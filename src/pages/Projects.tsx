@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,83 +14,123 @@ import {
   Clock,
   MoreHorizontal,
   Star,
-  GitBranch
+  GitBranch,
+  Loader2
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  progress: number | null;
+  budget: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  created_at: string;
+  product: {
+    name: string;
+    owner: {
+      first_name: string | null;
+      last_name: string | null;
+    } | null;
+  } | null;
+}
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const projects = [
-    {
-      id: 1,
-      name: "E-Commerce Platform",
-      description: "Modern e-commerce solution with microservices architecture",
-      progress: 85,
-      status: "On Track",
-      priority: "High",
-      startDate: "2024-01-15",
-      endDate: "2024-03-30",
-      teamSize: 8,
-      budget: "$120,000",
-      spent: "$95,000",
-      manager: "Sarah Johnson",
-      tags: ["Web", "Microservices", "React"]
-    },
-    {
-      id: 2,
-      name: "Mobile App Redesign",
-      description: "Complete UI/UX overhaul for mobile application",
-      progress: 60,
-      status: "At Risk",
-      priority: "Medium",
-      startDate: "2024-02-01",
-      endDate: "2024-04-15",
-      teamSize: 5,
-      budget: "$75,000",
-      spent: "$52,000",
-      manager: "Mike Chen",
-      tags: ["Mobile", "UI/UX", "Design"]
-    },
-    {
-      id: 3,
-      name: "Data Migration Project",
-      description: "Legacy system data migration to cloud infrastructure",
-      progress: 95,
-      status: "On Track",
-      priority: "High",
-      startDate: "2024-01-01",
-      endDate: "2024-02-28",
-      teamSize: 3,
-      budget: "$45,000",
-      spent: "$43,000",
-      manager: "Alex Rivera",
-      tags: ["Database", "Cloud", "Migration"]
-    },
-    {
-      id: 4,
-      name: "Security Audit & Compliance",
-      description: "Comprehensive security assessment and GDPR compliance",
-      progress: 40,
-      status: "Behind",
-      priority: "Critical",
-      startDate: "2024-02-15",
-      endDate: "2024-05-01",
-      teamSize: 6,
-      budget: "$90,000",
-      spent: "$35,000",
-      manager: "Emma Wilson",
-      tags: ["Security", "Compliance", "Audit"]
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          product:products(
+            name,
+            owner:profiles!products_owner_id_fkey(
+              first_name,
+              last_name
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching projects:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load projects",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setProjects(data || []);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load projects",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || project.status.toLowerCase().replace(" ", "-") === statusFilter;
+                         project.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || project.status.toLowerCase().replace(" ", "_") === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active': return 'default';
+      case 'planning': return 'secondary';
+      case 'on_hold': return 'destructive';
+      case 'completed': return 'outline';
+      default: return 'secondary';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case 'critical': return 'destructive';
+      case 'high': return 'default';
+      case 'medium': return 'secondary';
+      case 'low': return 'outline';
+      default: return 'secondary';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading projects...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,9 +167,10 @@ const Projects = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="on-track">On Track</SelectItem>
-                  <SelectItem value="at-risk">At Risk</SelectItem>
-                  <SelectItem value="behind">Behind</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="planning">Planning</SelectItem>
+                  <SelectItem value="on_hold">On Hold</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -138,7 +180,11 @@ const Projects = () => {
         {/* Projects Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
-            <Card key={project.id} className="border-border hover:shadow-lg transition-all duration-200 cursor-pointer">
+            <Card 
+              key={project.id} 
+              className="border-border hover:shadow-lg transition-all duration-200 cursor-pointer"
+              onClick={() => navigate(`/projects/${project.id}`)}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -148,7 +194,14 @@ const Projects = () => {
                     </div>
                     <CardDescription className="text-sm">{project.description}</CardDescription>
                   </div>
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle menu action
+                    }}
+                  >
                     <MoreHorizontal className="w-4 h-4" />
                   </Button>
                 </div>
@@ -157,17 +210,11 @@ const Projects = () => {
               <CardContent className="space-y-4">
                 {/* Status and Priority */}
                 <div className="flex items-center justify-between">
-                  <Badge variant={
-                    project.status === "On Track" ? "default" : 
-                    project.status === "At Risk" ? "secondary" : "destructive"
-                  }>
-                    {project.status}
+                  <Badge variant={getStatusColor(project.status)}>
+                    {project.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </Badge>
-                  <Badge variant="outline" className={
-                    project.priority === "Critical" ? "border-destructive text-destructive" :
-                    project.priority === "High" ? "border-primary text-primary" : ""
-                  }>
-                    {project.priority}
+                  <Badge variant={getPriorityColor(project.priority)}>
+                    {project.priority.charAt(0).toUpperCase() + project.priority.slice(1)}
                   </Badge>
                 </div>
 
@@ -187,45 +234,47 @@ const Projects = () => {
                       <Calendar className="w-3 h-3 mr-1" />
                       Due Date
                     </div>
-                    <span className="text-foreground">{new Date(project.endDate).toLocaleDateString()}</span>
+                    <span className="text-foreground">
+                      {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'Not set'}
+                    </span>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-muted-foreground">
-                      <Users className="w-3 h-3 mr-1" />
-                      Team Size
+                      <GitBranch className="w-3 h-3 mr-1" />
+                      Product
                     </div>
-                    <span className="text-foreground">{project.teamSize} members</span>
+                    <span className="text-foreground">{project.product?.name || 'N/A'}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-muted-foreground">
-                      <GitBranch className="w-3 h-3 mr-1" />
-                      Manager
+                      <Users className="w-3 h-3 mr-1" />
+                      Owner
                     </div>
-                    <span className="text-foreground">{project.manager}</span>
+                    <span className="text-foreground">
+                      {project.product?.owner 
+                        ? `${project.product.owner.first_name} ${project.product.owner.last_name}`
+                        : 'N/A'
+                      }
+                    </span>
                   </div>
                 </div>
 
                 {/* Budget */}
-                <div className="pt-2 border-t border-border">
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">Budget</span>
-                    <span className="text-foreground">{project.spent} / {project.budget}</span>
+                {project.budget && (
+                  <div className="pt-2 border-t border-border">
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="text-muted-foreground">Budget</span>
+                      <span className="text-foreground">${project.budget.toLocaleString()}</span>
+                    </div>
+                    <Progress value={50} className="h-1" />
                   </div>
-                  <Progress 
-                    value={(parseInt(project.spent.replace(/[$,]/g, '')) / parseInt(project.budget.replace(/[$,]/g, ''))) * 100} 
-                    className="h-1"
-                  />
-                </div>
+                )}
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1">
-                  {project.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+                {/* Created Date */}
+                <div className="pt-2 border-t border-border text-xs text-muted-foreground">
+                  Created: {new Date(project.created_at).toLocaleDateString()}
                 </div>
               </CardContent>
             </Card>
