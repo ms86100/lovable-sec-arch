@@ -841,6 +841,7 @@ export type Database = {
           dependencies: Json | null
           description: string | null
           due_date: string | null
+          estimated_effort_hours: number | null
           id: string
           milestone_id: string
           owner_id: string | null
@@ -859,6 +860,7 @@ export type Database = {
           dependencies?: Json | null
           description?: string | null
           due_date?: string | null
+          estimated_effort_hours?: number | null
           id?: string
           milestone_id: string
           owner_id?: string | null
@@ -877,6 +879,7 @@ export type Database = {
           dependencies?: Json | null
           description?: string | null
           due_date?: string | null
+          estimated_effort_hours?: number | null
           id?: string
           milestone_id?: string
           owner_id?: string | null
