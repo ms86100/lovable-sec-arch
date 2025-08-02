@@ -12,6 +12,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import Products from "./pages/Products";
 import Dashboard from "./pages/Dashboard";
 import Templates from "./pages/Templates";
+import ProjectNew from "./pages/ProjectNew";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
@@ -46,6 +47,16 @@ const App = () => (
                 <Layout>
                   <ProtectedRoute>
                     <Projects />
+                  </ProtectedRoute>
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/projects/new" 
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <ProjectNew />
                   </ProtectedRoute>
                 </Layout>
               } 
