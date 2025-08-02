@@ -29,7 +29,8 @@ import {
   Zap,
   Shield,
   BarChart,
-  Eye
+  Eye,
+  MessageSquare
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
@@ -40,6 +41,9 @@ import PerformanceDashboard from '@/components/performance/PerformanceDashboard'
 import ResourceManager from '@/components/resources/ResourceManager'
 import BudgetTracker from '@/components/budget/BudgetTracker'
 import AdvancedAnalytics from '@/components/analytics/AdvancedAnalytics'
+import CommunicationHub from '@/components/communication/CommunicationHub'
+import DocumentRepository from '@/components/documents/DocumentRepository'
+import SecurityCenter from '@/components/security/SecurityCenter'
 
 interface DashboardStats {
   totalProducts: number
@@ -416,7 +420,7 @@ export default function Dashboard() {
 
       {/* Enhanced Dashboard with Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full lg:w-auto lg:grid-cols-8">
+        <TabsList className="grid w-full lg:w-auto lg:grid-cols-11">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Overview
@@ -448,6 +452,18 @@ export default function Dashboard() {
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Analytics
+          </TabsTrigger>
+          <TabsTrigger value="communication" className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Communication
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Documents
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            Security
           </TabsTrigger>
         </TabsList>
 
@@ -709,6 +725,18 @@ export default function Dashboard() {
 
         <TabsContent value="analytics" className="space-y-6">
           <AdvancedAnalytics />
+        </TabsContent>
+
+        <TabsContent value="communication" className="space-y-6">
+          <CommunicationHub />
+        </TabsContent>
+
+        <TabsContent value="documents" className="space-y-6">
+          <DocumentRepository />
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6">
+          <SecurityCenter />
         </TabsContent>
       </Tabs>
     </div>
