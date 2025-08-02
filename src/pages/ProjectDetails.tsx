@@ -11,7 +11,9 @@ import { StakeholdersManager } from '@/components/stakeholders/StakeholdersManag
 import { InfrastructureManager } from '@/components/infrastructure/InfrastructureManager'
 import { RiskManager } from '@/components/risks/RiskManager'
 import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
-import { ProjectBudget } from '@/components/budget/ProjectBudget'
+import { BudgetTracker } from '@/components/budget/BudgetTracker'
+import { SecurityCompliance } from '@/components/security/SecurityCompliance'
+import { ProjectDocumentation } from '@/components/documentation/ProjectDocumentation'
 import { ProjectForm } from '@/components/forms/ProjectForm'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { 
@@ -26,7 +28,8 @@ import {
   AlertTriangle,
   FileText,
   Settings,
-  Edit
+  Edit,
+  Shield
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
@@ -260,33 +263,41 @@ const ProjectDetails = () => {
 
         {/* Project Details Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Package className="w-4 h-4" />
+          <TabsList className="grid w-full grid-cols-9 text-xs">
+            <TabsTrigger value="overview" className="flex items-center gap-1">
+              <Package className="w-3 h-3" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
+            <TabsTrigger value="timeline" className="flex items-center gap-1">
+              <Target className="w-3 h-3" />
               Timeline
             </TabsTrigger>
-            <TabsTrigger value="budget" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
+            <TabsTrigger value="budget" className="flex items-center gap-1">
+              <DollarSign className="w-3 h-3" />
               Budget
             </TabsTrigger>
-            <TabsTrigger value="stakeholders" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Team & Stakeholders
+            <TabsTrigger value="stakeholders" className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              Team
             </TabsTrigger>
-            <TabsTrigger value="infrastructure" className="flex items-center gap-2">
-              <Server className="w-4 h-4" />
+            <TabsTrigger value="infrastructure" className="flex items-center gap-1">
+              <Server className="w-3 h-3" />
               Infrastructure
             </TabsTrigger>
-            <TabsTrigger value="risks" className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              Risk Management
+            <TabsTrigger value="risks" className="flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              Risks
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
+            <TabsTrigger value="security" className="flex items-center gap-1">
+              <Shield className="w-3 h-3" />
+              Security
+            </TabsTrigger>
+            <TabsTrigger value="documentation" className="flex items-center gap-1">
+              <FileText className="w-3 h-3" />
+              Docs
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1">
+              <Settings className="w-3 h-3" />
               Settings
             </TabsTrigger>
           </TabsList>
@@ -376,25 +387,19 @@ const ProjectDetails = () => {
           </TabsContent>
 
           <TabsContent value="timeline" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Timeline & Milestones</CardTitle>
-                <CardDescription>
-                  View and manage project milestones and tasks
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium">Timeline feature coming soon</p>
-                  <p className="text-sm">Full milestone and task management will be available here</p>
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectTimeline projectId={project.id} projectName={project.name} />
           </TabsContent>
 
           <TabsContent value="budget" className="space-y-6">
-            <ProjectBudget projectId={project.id} projectBudget={project.budget} />
+            <BudgetTracker projectId={project.id} projectName={project.name} />
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <SecurityCompliance projectId={project.id} projectName={project.name} />
+          </TabsContent>
+
+          <TabsContent value="documentation" className="space-y-6">
+            <ProjectDocumentation projectId={project.id} projectName={project.name} />
           </TabsContent>
 
           <TabsContent value="stakeholders" className="space-y-6">

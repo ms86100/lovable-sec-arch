@@ -18,10 +18,7 @@ interface ProjectServer {
   server_name: string
   environment: string
   configuration_details?: any
-  ownership_type: string
-  last_assessment_date?: string
-  assessment_type?: string
-  export_control_status: string
+  server_type: string
   notes?: string
   created_at: string
 }
@@ -41,10 +38,7 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
   const [formData, setFormData] = useState({
     server_name: '',
     environment: 'dev',
-    ownership_type: 'digital',
-    last_assessment_date: '',
-    assessment_type: '',
-    export_control_status: 'not_assessed',
+    server_type: 'on_prem',
     cpu: '',
     memory: '',
     storage: '',
@@ -80,10 +74,7 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
     setFormData({
       server_name: '',
       environment: 'dev',
-      ownership_type: 'digital',
-      last_assessment_date: '',
-      assessment_type: '',
-      export_control_status: 'not_assessed',
+      server_type: 'on_prem',
       cpu: '',
       memory: '',
       storage: '',
@@ -98,10 +89,7 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
     setFormData({
       server_name: server.server_name,
       environment: server.environment,
-      ownership_type: server.ownership_type,
-      last_assessment_date: server.last_assessment_date || '',
-      assessment_type: server.assessment_type || '',
-      export_control_status: server.export_control_status,
+      server_type: server.server_type,
       cpu: config.cpu || '',
       memory: config.memory || '',
       storage: config.storage || '',
@@ -124,10 +112,7 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
         project_id: projectId,
         server_name: formData.server_name,
         environment: formData.environment,
-        ownership_type: formData.ownership_type,
-        last_assessment_date: formData.last_assessment_date || null,
-        assessment_type: formData.assessment_type || null,
-        export_control_status: formData.export_control_status,
+        server_type: formData.server_type,
         configuration_details: configuration,
         notes: formData.notes || null,
         created_by: user?.id,
@@ -207,16 +192,6 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
     }
   }
 
-  const getExportControlColor = (status: string) => {
-    switch (status) {
-      case 'export_controlled': return 'destructive'
-      case 'dual_use': return 'default'
-      case 'military': return 'destructive'
-      case 'not_controlled': return 'secondary'
-      case 'not_assessed': return 'outline'
-      default: return 'outline'
-    }
-  }
 
   if (loading) {
     return <div className="p-6">Loading infrastructure...</div>
@@ -275,34 +250,17 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="ownership_type">Ownership Type</Label>
-                  <Select value={formData.ownership_type} onValueChange={(value) => setFormData({...formData, ownership_type: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="digital">Digital</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="export_control_status">Export Control Status</Label>
-                  <Select value={formData.export_control_status} onValueChange={(value) => setFormData({...formData, export_control_status: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="not_assessed">Not Assessed</SelectItem>
-                      <SelectItem value="not_controlled">Not Controlled</SelectItem>
-                      <SelectItem value="export_controlled">Export Controlled</SelectItem>
-                      <SelectItem value="dual_use">Dual Use</SelectItem>
-                      <SelectItem value="military">Military</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="server_type">Server Type</Label>
+                <Select value={formData.server_type} onValueChange={(value) => setFormData({...formData, server_type: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="on_prem">On-Prem</SelectItem>
+                    <SelectItem value="cloud">Cloud</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -335,30 +293,6 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="assessment_type">Last Assessment Type</Label>
-                  <Select value={formData.assessment_type} onValueChange={(value) => setFormData({...formData, assessment_type: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select assessment" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ard">ARD</SelectItem>
-                      <SelectItem value="ors">ORS</SelectItem>
-                      <SelectItem value="mrs">MRS</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="last_assessment_date">Assessment Date</Label>
-                  <Input
-                    id="last_assessment_date"
-                    type="date"
-                    value={formData.last_assessment_date}
-                    onChange={(e) => setFormData({...formData, last_assessment_date: e.target.value})}
-                  />
-                </div>
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
@@ -395,11 +329,8 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
                       <Badge variant={getEnvironmentColor(server.environment)}>
                         {server.environment.toUpperCase()}
                       </Badge>
-                      <Badge variant={getExportControlColor(server.export_control_status)}>
-                        {server.export_control_status.replace('_', ' ')}
-                      </Badge>
                       <Badge variant="outline">
-                        {server.ownership_type}
+                        {server.server_type === 'on_prem' ? 'On-Prem' : 'Cloud'}
                       </Badge>
                     </div>
                     
@@ -420,12 +351,6 @@ export function InfrastructureManager({ projectId, projectName }: Infrastructure
                         <div className="flex items-center">
                           <Database className="w-3 h-3 mr-1" />
                           Storage: {server.configuration_details.storage}
-                        </div>
-                      )}
-                      {server.last_assessment_date && (
-                        <div className="flex items-center">
-                          <Clock className="w-3 h-3 mr-1" />
-                          Last {server.assessment_type?.toUpperCase()}: {format(new Date(server.last_assessment_date), 'MMM dd, yyyy')}
                         </div>
                       )}
                     </div>

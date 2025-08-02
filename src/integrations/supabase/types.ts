@@ -218,6 +218,47 @@ export type Database = {
           },
         ]
       }
+      project_documentation: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          document_name: string
+          id: string
+          last_updated_date: string
+          project_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          document_name: string
+          id?: string
+          last_updated_date: string
+          project_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          document_name?: string
+          id?: string
+          last_updated_date?: string
+          project_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_documentation_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_issues: {
         Row: {
           assigned_to: string | null
@@ -459,6 +500,47 @@ export type Database = {
           },
         ]
       }
+      project_security_compliance: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_compliance_last_assessment: string | null
+          export_control_status: string | null
+          id: string
+          project_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_compliance_last_assessment?: string | null
+          export_control_status?: string | null
+          id?: string
+          project_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_compliance_last_assessment?: string | null
+          export_control_status?: string | null
+          id?: string
+          project_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_security_compliance_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_servers: {
         Row: {
           assessment_type: string | null
@@ -466,13 +548,11 @@ export type Database = {
           created_at: string
           created_by: string | null
           environment: string
-          export_control_status: string | null
           id: string
-          last_assessment_date: string | null
           notes: string | null
-          ownership_type: string | null
           project_id: string
           server_name: string
+          server_type: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -482,13 +562,11 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           environment: string
-          export_control_status?: string | null
           id?: string
-          last_assessment_date?: string | null
           notes?: string | null
-          ownership_type?: string | null
           project_id: string
           server_name: string
+          server_type?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -498,13 +576,11 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           environment?: string
-          export_control_status?: string | null
           id?: string
-          last_assessment_date?: string | null
           notes?: string | null
-          ownership_type?: string | null
           project_id?: string
           server_name?: string
+          server_type?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -841,9 +917,11 @@ export type Database = {
           created_by: string | null
           description: string | null
           end_date: string | null
+          external_company_name: string | null
           id: string
           is_active: boolean | null
           name: string
+          operator_type: string | null
           priority: string
           product_id: string
           progress: number | null
@@ -860,9 +938,11 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date?: string | null
+          external_company_name?: string | null
           id?: string
           is_active?: boolean | null
           name: string
+          operator_type?: string | null
           priority?: string
           product_id: string
           progress?: number | null
@@ -879,9 +959,11 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date?: string | null
+          external_company_name?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
+          operator_type?: string | null
           priority?: string
           product_id?: string
           progress?: number | null

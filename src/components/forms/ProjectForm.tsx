@@ -32,6 +32,8 @@ interface FormData {
   product_id: string
   template_id: string | null
   assigned_to: string | null
+  operator_type: string
+  external_company_name: string | null
 }
 
 export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) {
@@ -60,7 +62,9 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
       end_date: project?.end_date ? new Date(project.end_date) : null,
       product_id: project?.product_id || '',
       template_id: project?.template_id || null,
-      assigned_to: project?.assigned_to || null
+      assigned_to: project?.assigned_to || null,
+      operator_type: project?.operator_type || 'internal',
+      external_company_name: project?.external_company_name || null
     }
   })
 
@@ -114,6 +118,8 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
         product_id: data.product_id,
         template_id: data.template_id || null,
         assigned_to: data.assigned_to || null,
+        operator_type: data.operator_type,
+        external_company_name: data.operator_type === 'external' ? data.external_company_name : null,
         updated_by: user?.id,
         is_active: true
       }
@@ -397,6 +403,46 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Project Operator */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="operator_type">Project Operator</Label>
+              <Select
+                value={watch('operator_type')}
+                onValueChange={(value) => {
+                  setValue('operator_type', value)
+                  if (value === 'internal') {
+                    setValue('external_company_name', null)
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="internal">Internal</SelectItem>
+                  <SelectItem value="external">External</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {watch('operator_type') === 'external' && (
+              <div className="space-y-2">
+                <Label htmlFor="external_company_name">External Company Name</Label>
+                <Input
+                  id="external_company_name"
+                  {...register('external_company_name', {
+                    required: watch('operator_type') === 'external' ? 'Company name is required for external operators' : false
+                  })}
+                  placeholder="Enter company name"
+                />
+                {errors.external_company_name && (
+                  <p className="text-sm text-destructive">{errors.external_company_name.message}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Actions */}
