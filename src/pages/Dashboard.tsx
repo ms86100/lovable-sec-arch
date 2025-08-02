@@ -44,6 +44,9 @@ import AdvancedAnalytics from '@/components/analytics/AdvancedAnalytics'
 import CommunicationHub from '@/components/communication/CommunicationHub'
 import DocumentRepository from '@/components/documents/DocumentRepository'
 import SecurityCenter from '@/components/security/SecurityCenter'
+import { ProjectMilestones } from '@/components/milestones/ProjectMilestones'
+import { ProjectBudget } from '@/components/budget/ProjectBudget'
+import { StakeholdersManager } from '@/components/stakeholders/StakeholdersManager'
 
 interface DashboardStats {
   totalProducts: number
@@ -67,6 +70,7 @@ interface Project {
   start_date?: string
   end_date?: string
   assigned_to?: string
+  budget?: number
   products: {
     name: string
   }
@@ -197,6 +201,7 @@ export default function Dashboard() {
           start_date,
           end_date,
           assigned_to,
+          budget,
           products!inner (name)
         `)
         .order('created_at', { ascending: false })
@@ -250,6 +255,7 @@ export default function Dashboard() {
           start_date,
           end_date,
           assigned_to,
+          budget,
           products!inner (name)
         `)
         .eq('product_id', productId)
@@ -882,11 +888,15 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="timeline" className="space-y-6">
-          <ProjectTimeline 
-            projects={selectedProjectId && selectedProjectId !== 'all' ? [recentProjects[0]].filter(Boolean) : filteredProjects} 
-            onProjectClick={(id) => navigate(`/projects/${id}`)}
-            selectedProjectId={selectedProjectId !== 'all' ? selectedProjectId : undefined}
-          />
+          {selectedProjectId && selectedProjectId !== 'all' ? (
+            <ProjectMilestones projectId={selectedProjectId} />
+          ) : (
+            <ProjectTimeline 
+              projects={filteredProjects} 
+              onProjectClick={(id) => navigate(`/projects/${id}`)}
+              selectedProjectId={undefined}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="risks" className="space-y-6">
@@ -894,7 +904,7 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="raci" className="space-y-6">
-          <RACIMatrix showAllProjects={true} />
+          <RACIMatrix />
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
@@ -906,7 +916,14 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="budget" className="space-y-6">
-          <BudgetTracker />
+          {selectedProjectId && selectedProjectId !== 'all' ? (
+            <ProjectBudget 
+              projectId={selectedProjectId} 
+              projectBudget={recentProjects[0]?.budget}
+            />
+          ) : (
+            <BudgetTracker />
+          )}
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">

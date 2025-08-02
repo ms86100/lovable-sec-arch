@@ -131,6 +131,51 @@ export type Database = {
         }
         Relationships: []
       }
+      project_budget_items: {
+        Row: {
+          actual_amount: number | null
+          category: string
+          created_at: string
+          created_by: string | null
+          date_incurred: string | null
+          description: string | null
+          id: string
+          item_name: string
+          planned_amount: number
+          project_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          actual_amount?: number | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          date_incurred?: string | null
+          description?: string | null
+          id?: string
+          item_name: string
+          planned_amount?: number
+          project_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          actual_amount?: number | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          date_incurred?: string | null
+          description?: string | null
+          id?: string
+          item_name?: string
+          planned_amount?: number
+          project_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       project_custom_values: {
         Row: {
           created_at: string
@@ -243,6 +288,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      project_milestones: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          progress: number | null
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          progress?: number | null
+          project_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          progress?: number | null
+          project_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      project_raci_matrix: {
+        Row: {
+          accountable_id: string | null
+          accountable_type: string | null
+          activity_name: string
+          consulted_ids: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          informed_ids: Json | null
+          project_id: string
+          responsible_id: string | null
+          responsible_type: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          accountable_id?: string | null
+          accountable_type?: string | null
+          activity_name: string
+          consulted_ids?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          informed_ids?: Json | null
+          project_id: string
+          responsible_id?: string | null
+          responsible_type?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          accountable_id?: string | null
+          accountable_type?: string | null
+          activity_name?: string
+          consulted_ids?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          informed_ids?: Json | null
+          project_id?: string
+          responsible_id?: string | null
+          responsible_type?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       project_risks: {
         Row: {
@@ -562,6 +700,105 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      project_tasks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          milestone_id: string
+          owner_id: string | null
+          owner_type: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          milestone_id: string
+          owner_id?: string | null
+          owner_type?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          milestone_id?: string
+          owner_id?: string | null
+          owner_type?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      project_team_members: {
+        Row: {
+          availability_hours: number | null
+          created_at: string
+          created_by: string | null
+          department: string | null
+          email: string | null
+          hourly_rate: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          project_id: string
+          role: string
+          skills: Json | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          availability_hours?: number | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          project_id: string
+          role: string
+          skills?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          availability_hours?: number | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          project_id?: string
+          role?: string
+          skills?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       project_templates: {
         Row: {
