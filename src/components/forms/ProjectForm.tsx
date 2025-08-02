@@ -394,14 +394,14 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
             <div className="space-y-2">
               <Label htmlFor="assigned_to">Assigned To</Label>
               <Select
-                value={watch('assigned_to') || ''}
-                onValueChange={(value) => setValue('assigned_to', value || null)}
+                value={watch('assigned_to') || 'unassigned'}
+                onValueChange={(value) => setValue('assigned_to', value === 'unassigned' ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {profiles.map((profile) => (
                     <SelectItem key={profile.user_id} value={profile.user_id}>
                       {profile.first_name} {profile.last_name} ({profile.email})
@@ -414,14 +414,14 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
             <div className="space-y-2">
               <Label htmlFor="template_id">Template (Optional)</Label>
               <Select
-                value={watch('template_id') || ''}
-                onValueChange={(value) => setValue('template_id', value || null)}
+                value={watch('template_id') || 'no_template'}
+                onValueChange={(value) => setValue('template_id', value === 'no_template' ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select template" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Template</SelectItem>
+                  <SelectItem value="no_template">No Template</SelectItem>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
