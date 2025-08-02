@@ -8,6 +8,8 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CompactCard } from '@/components/dashboard/CompactCard'
+import { DashboardControls } from '@/components/dashboard/DashboardControls'
 import { 
   Package, 
   FolderOpen, 
@@ -147,11 +149,18 @@ export default function Dashboard() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all')
   const [availableProjects, setAvailableProjects] = useState<Project[]>([])
 
+  // Dashboard UI states
+  const [viewMode, setViewMode] = useState<'compact' | 'expanded'>('compact')
+  const [layoutMode, setLayoutMode] = useState<'grid' | 'masonry' | 'list'>('grid')
+  const [showGlobalData, setShowGlobalData] = useState(true)
+  const [pinnedCards, setPinnedCards] = useState<Set<string>>(new Set())
+
   const canCreateProducts = hasRole('manager') || hasRole('admin')
 
   useEffect(() => {
     fetchDashboardData()
     fetchProducts()
+    loadDashboardPreferences()
   }, [])
 
   useEffect(() => {
@@ -422,6 +431,38 @@ export default function Dashboard() {
     }
   }
 
+  const loadDashboardPreferences = () => {
+    try {
+      const saved = localStorage.getItem('dashboardPreferences')
+      if (saved) {
+        const preferences = JSON.parse(saved)
+        setViewMode(preferences.viewMode || 'compact')
+        setLayoutMode(preferences.layoutMode || 'grid')
+        setShowGlobalData(preferences.showGlobalData !== false)
+        if (preferences.selectedProductId && preferences.selectedProductId !== 'all') {
+          setSelectedProductId(preferences.selectedProductId)
+        }
+        if (preferences.selectedProjectId && preferences.selectedProjectId !== 'all') {
+          setSelectedProjectId(preferences.selectedProjectId)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading dashboard preferences:', error)
+    }
+  }
+
+  const togglePinCard = (cardId: string) => {
+    setPinnedCards(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(cardId)) {
+        newSet.delete(cardId)
+      } else {
+        newSet.add(cardId)
+      }
+      return newSet
+    })
+  }
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'text-red-500'
@@ -517,199 +558,140 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Project Filter */}
-      <Card className="airbus-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-airbus-blue" />
-            Project Filter
-          </CardTitle>
-          <CardDescription>
-            Select a product and project to view specific data
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Product</label>
-               <Select value={selectedProductId || 'all'} onValueChange={setSelectedProductId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a product" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Products</SelectItem>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Project</label>
-              <Select 
-                value={selectedProjectId || 'all'} 
-                onValueChange={setSelectedProjectId}
-                disabled={!selectedProductId || selectedProductId === 'all'}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a project" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Projects</SelectItem>
-                  {availableProjects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Dashboard Controls */}
+      <DashboardControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        layoutMode={layoutMode}
+        onLayoutModeChange={setLayoutMode}
+        showGlobalData={showGlobalData}
+        onShowGlobalDataChange={setShowGlobalData}
+        selectedProductId={selectedProductId}
+        onProductChange={setSelectedProductId}
+        selectedProjectId={selectedProjectId}
+        onProjectChange={setSelectedProjectId}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        products={products}
+        projects={availableProjects}
+      />
 
-            <div className="flex items-end">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSelectedProductId('all')
-                  setSelectedProjectId('all')
-                  fetchDashboardData()
-                }}
-                className="w-full"
-              >
-                Clear Filter
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Compact Dashboard Cards */}
+      <div className={`
+        grid gap-4 
+        ${layoutMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : ''}
+        ${layoutMode === 'masonry' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : ''}
+        ${layoutMode === 'list' ? 'grid-cols-1' : ''}
+      `}>
+        {/* Health Summary Cards */}
+        <CompactCard
+          title="🟢 Healthy Projects"
+          value={stats.healthyProjects}
+          description="Projects that are on track with no major issues"
+          icon={<CheckCircle className="w-4 h-4 text-green-600" />}
+          variant="success"
+          isPinned={pinnedCards.has('healthy')}
+          onPin={() => togglePinCard('healthy')}
+          isGlobal={selectedProjectId === 'all'}
+        />
 
-      {/* Project Health Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="kpi-card group animate-scale-in border-green-200 dark:border-green-800">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">🟢 Healthy Projects</p>
-                <p className="text-3xl font-bold text-green-600">{stats.healthyProjects}</p>
-                <p className="text-xs text-muted-foreground mt-1">On track</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600 group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
+        <CompactCard
+          title="🟠 At Risk Projects"
+          value={stats.atRiskProjects}
+          description="Projects that are delayed or behind schedule"
+          icon={<AlertTriangle className="w-4 h-4 text-amber-600" />}
+          variant="warning"
+          isPinned={pinnedCards.has('atRisk')}
+          onPin={() => togglePinCard('atRisk')}
+          isGlobal={selectedProjectId === 'all'}
+        />
 
-        <Card className="kpi-card group animate-scale-in border-amber-200 dark:border-amber-800" style={{ animationDelay: '0.1s' }}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">🟠 At Risk Projects</p>
-                <p className="text-3xl font-bold text-amber-600">{stats.atRiskProjects}</p>
-                <p className="text-xs text-muted-foreground mt-1">Delayed</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-amber-600 group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
+        <CompactCard
+          title="🔴 Critical Projects"
+          value={stats.criticalProjects}
+          description="Projects with critical issues requiring immediate attention"
+          icon={<AlertCircle className="w-4 h-4 text-red-600" />}
+          variant="destructive"
+          isPinned={pinnedCards.has('critical')}
+          onPin={() => togglePinCard('critical')}
+          isGlobal={selectedProjectId === 'all'}
+        />
 
-        <Card className="kpi-card group animate-scale-in border-red-200 dark:border-red-800" style={{ animationDelay: '0.2s' }}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">🔴 Critical Projects</p>
-                <p className="text-3xl font-bold text-red-600">{stats.criticalProjects}</p>
-                <p className="text-xs text-muted-foreground mt-1">Critical issues</p>
-              </div>
-              <AlertCircle className="h-8 w-8 text-red-600 group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* KPI Cards */}
+        {showGlobalData && (
+          <CompactCard
+            title="Products"
+            value={stats.totalProducts}
+            description="Total number of products in portfolio"
+            icon={<Package className="w-4 h-4 text-primary" />}
+            isGlobal={true}
+            isPinned={pinnedCards.has('products')}
+            onPin={() => togglePinCard('products')}
+          />
+        )}
 
-      {/* Enhanced KPI Cards with Budget and Tasks */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-slide-up">
-        <Card className="kpi-card group animate-scale-in">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Products</p>
-                <p className="text-3xl font-bold text-airbus-blue">{stats.totalProducts}</p>
-                <p className="text-xs text-muted-foreground mt-1">Active portfolio</p>
-              </div>
-              <Package className="h-8 w-8 text-airbus-blue group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
+        <CompactCard
+          title="Total Projects"
+          value={stats.totalProjects}
+          description={selectedProjectId !== 'all' ? 'Selected project data' : 'All projects across products'}
+          icon={<FolderOpen className="w-4 h-4 text-primary" />}
+          isPinned={pinnedCards.has('projects')}
+          onPin={() => togglePinCard('projects')}
+          isGlobal={selectedProjectId === 'all'}
+        />
 
-        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.1s' }}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Projects</p>
-                <p className="text-3xl font-bold text-airbus-blue">{stats.totalProjects}</p>
-                <p className="text-xs text-muted-foreground mt-1">All time</p>
-              </div>
-              <FolderOpen className="h-8 w-8 text-airbus-blue group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.2s' }}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Progress</p>
-                <p className="text-3xl font-bold text-primary">{stats.avgProgress}%</p>
-                <p className="text-xs text-muted-foreground mt-1">Based on tasks</p>
-              </div>
-              <Target className="h-8 w-8 text-primary group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.3s' }}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">💰 Total Budget</p>
-                <p className="text-3xl font-bold text-green-600">${stats.totalBudget.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground mt-1">Planned amount</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-600 group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.4s' }}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">💸 Total Spent</p>
-                <p className="text-3xl font-bold text-blue-600">${stats.totalSpent.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground mt-1">Actual amount</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-blue-600 group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="kpi-card group animate-scale-in cursor-pointer hover:shadow-lg transition-shadow" 
-          style={{ animationDelay: '0.5s' }}
-          onClick={() => setShowOverdueList(!showOverdueList)}
+        <CompactCard
+          title="Average Progress"
+          value={`${stats.avgProgress}%`}
+          description="Average progress based on task completion"
+          icon={<Target className="w-4 h-4 text-primary" />}
+          isPinned={pinnedCards.has('progress')}
+          onPin={() => togglePinCard('progress')}
+          isGlobal={selectedProjectId === 'all'}
         >
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Overdue Tasks</p>
-                <p className="text-3xl font-bold text-red-600">{stats.overdueTasks}</p>
-                <p className="text-xs text-muted-foreground mt-1">Click to view</p>
-              </div>
-              <Clock className="h-8 w-8 text-red-600 group-hover:animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
+          <Progress value={stats.avgProgress} className="mt-2" />
+        </CompactCard>
+
+        <CompactCard
+          title="💰 Total Budget"
+          value={`$${stats.totalBudget.toLocaleString()}`}
+          description="Total planned budget amount"
+          icon={<DollarSign className="w-4 h-4 text-green-600" />}
+          variant="success"
+          isPinned={pinnedCards.has('budget')}
+          onPin={() => togglePinCard('budget')}
+          isGlobal={selectedProjectId === 'all'}
+        />
+
+        <CompactCard
+          title="💸 Total Spent"
+          value={`$${stats.totalSpent.toLocaleString()}`}
+          description="Total actual spent amount"
+          icon={<DollarSign className="w-4 h-4 text-blue-600" />}
+          isPinned={pinnedCards.has('spent')}
+          onPin={() => togglePinCard('spent')}
+          isGlobal={selectedProjectId === 'all'}
+        />
+
+        <CompactCard
+          title="Overdue Tasks"
+          value={stats.overdueTasks}
+          description="Tasks that are past their due date"
+          icon={<Clock className="w-4 h-4 text-red-600" />}
+          variant="destructive"
+          isPinned={pinnedCards.has('overdue')}
+          onPin={() => togglePinCard('overdue')}
+          isGlobal={selectedProjectId === 'all'}
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowOverdueList(!showOverdueList)}
+            className="mt-2 w-full"
+          >
+            {showOverdueList ? 'Hide' : 'View'} Details
+          </Button>
+        </CompactCard>
       </div>
 
       {/* Overdue Tasks List */}

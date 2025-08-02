@@ -131,6 +131,54 @@ export type Database = {
         }
         Relationships: []
       }
+      project_aop: {
+        Row: {
+          activity: string
+          amount_eur: number | null
+          aop_year: number | null
+          approver: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          impact_risk_associated: string | null
+          project_id: string
+          task_description: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          activity: string
+          amount_eur?: number | null
+          aop_year?: number | null
+          approver?: string | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact_risk_associated?: string | null
+          project_id: string
+          task_description?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          activity?: string
+          amount_eur?: number | null
+          aop_year?: number | null
+          approver?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact_risk_associated?: string | null
+          project_id?: string
+          task_description?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       project_budget_items: {
         Row: {
           actual_amount: number | null

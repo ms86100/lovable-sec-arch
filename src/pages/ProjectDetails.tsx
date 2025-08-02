@@ -16,6 +16,7 @@ import { SecurityCompliance } from '@/components/security/SecurityCompliance'
 import { ProjectDocumentation } from '@/components/documentation/ProjectDocumentation'
 import { ProjectForm } from '@/components/forms/ProjectForm'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ProjectAOP } from '@/components/aop/ProjectAOP'
 import { 
   ArrowLeft, 
   Calendar, 
@@ -29,7 +30,8 @@ import {
   FileText,
   Settings,
   Edit,
-  Shield
+  Shield,
+  BarChart3
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
@@ -263,7 +265,7 @@ const ProjectDetails = () => {
 
         {/* Project Details Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 text-xs">
+          <TabsList className="grid w-full grid-cols-10 text-xs">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <Package className="w-3 h-3" />
               Overview
@@ -275,6 +277,10 @@ const ProjectDetails = () => {
             <TabsTrigger value="budget" className="flex items-center gap-1">
               <DollarSign className="w-3 h-3" />
               Budget
+            </TabsTrigger>
+            <TabsTrigger value="aop" className="flex items-center gap-1">
+              <BarChart3 className="w-3 h-3" />
+              AOP
             </TabsTrigger>
             <TabsTrigger value="stakeholders" className="flex items-center gap-1">
               <Users className="w-3 h-3" />
@@ -392,6 +398,10 @@ const ProjectDetails = () => {
 
           <TabsContent value="budget" className="space-y-6">
             <ProjectBudget projectId={project.id} projectBudget={project.budget} />
+          </TabsContent>
+
+          <TabsContent value="aop" className="space-y-6">
+            <ProjectAOP projectId={project.id} projectName={project.name} />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
