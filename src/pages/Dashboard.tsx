@@ -81,6 +81,11 @@ interface RecentActivity {
   description: string
 }
 
+interface Product {
+  id: string
+  name: string
+}
+
 export default function Dashboard() {
   const { user, userRole, hasRole } = useAuth()
   const navigate = useNavigate()
@@ -101,12 +106,34 @@ export default function Dashboard() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterPriority, setFilterPriority] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  
+  // Project filter states
+  const [products, setProducts] = useState<Product[]>([])
+  const [selectedProductId, setSelectedProductId] = useState<string>('')
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+  const [availableProjects, setAvailableProjects] = useState<Project[]>([])
 
   const canCreateProducts = hasRole('manager') || hasRole('admin')
 
   useEffect(() => {
     fetchDashboardData()
+    fetchProducts()
   }, [])
+
+  useEffect(() => {
+    if (selectedProductId) {
+      fetchProjectsForProduct(selectedProductId)
+    } else {
+      setAvailableProjects([])
+      setSelectedProjectId('')
+    }
+  }, [selectedProductId])
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      fetchProjectSpecificData()
+    }
+  }, [selectedProjectId])
 
   const fetchDashboardData = async () => {
     try {
@@ -196,6 +223,91 @@ export default function Dashboard() {
     }
   }
 
+  const fetchProducts = async () => {
+    try {
+      const { data: productsData } = await supabase
+        .from('products')
+        .select('id, name')
+        .order('name')
+      
+      setProducts(productsData || [])
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    }
+  }
+
+  const fetchProjectsForProduct = async (productId: string) => {
+    try {
+      const { data: projectsData } = await supabase
+        .from('projects')
+        .select(`
+          id,
+          name,
+          status,
+          progress,
+          priority,
+          created_at,
+          start_date,
+          end_date,
+          assigned_to,
+          products!inner (name)
+        `)
+        .eq('product_id', productId)
+        .order('name')
+      
+      setAvailableProjects(projectsData || [])
+    } catch (error) {
+      console.error('Error fetching projects for product:', error)
+    }
+  }
+
+  const fetchProjectSpecificData = async () => {
+    if (!selectedProjectId) return
+    
+    try {
+      // Update stats to be project-specific
+      const { data: projectData } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          products!inner (name)
+        `)
+        .eq('id', selectedProjectId)
+        .single()
+
+      if (projectData) {
+        // Set project-specific data
+        setRecentProjects([projectData])
+        
+        // Update stats for the selected project
+        setStats(prev => ({
+          ...prev,
+          totalProjects: 1,
+          activeProjects: projectData.status === 'active' ? 1 : 0,
+          completedProjects: projectData.status === 'completed' ? 1 : 0,
+          planningProjects: projectData.status === 'planning' ? 1 : 0,
+          onHoldProjects: projectData.status === 'on_hold' ? 1 : 0,
+          avgProgress: projectData.progress || 0
+        }))
+
+        // Generate project-specific activity
+        const projectActivity: RecentActivity[] = [
+          {
+            id: projectData.id,
+            type: 'project_created',
+            project_name: projectData.name,
+            user_name: 'System User',
+            timestamp: projectData.created_at,
+            description: `Project "${projectData.name}" was created`
+          }
+        ]
+        setRecentActivity(projectActivity)
+      }
+    } catch (error) {
+      console.error('Error fetching project-specific data:', error)
+    }
+  }
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'text-red-500'
@@ -275,6 +387,11 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-lg mt-2">
             Welcome back, {user?.email}! You have <span className="font-medium text-airbus-blue">{userRole?.role}</span> access.
           </p>
+          {selectedProjectId && (
+            <p className="text-sm text-airbus-blue mt-1">
+              Viewing: {availableProjects.find(p => p.id === selectedProjectId)?.name}
+            </p>
+          )}
         </div>
         <div className="flex gap-3">
           {canCreateProducts && (
@@ -285,6 +402,74 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Project Filter */}
+      <Card className="airbus-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-airbus-blue" />
+            Project Filter
+          </CardTitle>
+          <CardDescription>
+            Select a product and project to view specific data
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Product</label>
+              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Products</SelectItem>
+                  {products.map((product) => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Project</label>
+              <Select 
+                value={selectedProjectId} 
+                onValueChange={setSelectedProjectId}
+                disabled={!selectedProductId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Projects</SelectItem>
+                  {availableProjects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-end">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSelectedProductId('')
+                  setSelectedProjectId('')
+                  fetchDashboardData()
+                }}
+                className="w-full"
+              >
+                Clear Filter
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Enhanced KPI Cards with Airbus Design */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-slide-up">
@@ -698,8 +883,9 @@ export default function Dashboard() {
 
         <TabsContent value="timeline" className="space-y-6">
           <ProjectTimeline 
-            projects={recentProjects} 
-            onProjectClick={(projectId) => navigate(`/projects/${projectId}`)} 
+            projects={selectedProjectId ? [recentProjects[0]].filter(Boolean) : filteredProjects} 
+            onProjectClick={(id) => navigate(`/projects/${id}`)}
+            selectedProjectId={selectedProjectId}
           />
         </TabsContent>
 
