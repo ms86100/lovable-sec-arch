@@ -35,12 +35,12 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
-import ProjectTimeline from '@/components/timeline/ProjectTimeline'
+import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
 import RiskDashboard from '@/components/risks/RiskDashboard'
 import RACIMatrix from '@/components/raci/RACIMatrix'
 import PerformanceDashboard from '@/components/performance/PerformanceDashboard'
 import ResourceManager from '@/components/resources/ResourceManager'
-import BudgetTracker from '@/components/budget/BudgetTracker'
+import { BudgetTracker } from '@/components/budget/BudgetTracker'
 import AdvancedAnalytics from '@/components/analytics/AdvancedAnalytics'
 import CommunicationHub from '@/components/communication/CommunicationHub'
 import DocumentRepository from '@/components/documents/DocumentRepository'
@@ -894,13 +894,23 @@ export default function Dashboard() {
 
         <TabsContent value="timeline" className="space-y-6">
           {selectedProjectId && selectedProjectId !== 'all' ? (
-            <ProjectMilestones projectId={selectedProjectId} />
-          ) : (
             <ProjectTimeline 
-              projects={filteredProjects} 
-              onProjectClick={(id) => navigate(`/projects/${id}`)}
-              selectedProjectId={undefined}
+              projectId={selectedProjectId} 
+              projectName={recentProjects[0]?.name || 'Selected Project'}
+              readOnly={true}
             />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Project Timeline
+                </CardTitle>
+                <CardDescription>
+                  Select a project to view its timeline and milestones
+                </CardDescription>
+              </CardHeader>
+            </Card>
           )}
         </TabsContent>
 
@@ -922,12 +932,23 @@ export default function Dashboard() {
 
         <TabsContent value="budget" className="space-y-6">
           {selectedProjectId && selectedProjectId !== 'all' ? (
-            <ProjectBudget 
+            <BudgetTracker 
               projectId={selectedProjectId} 
-              projectBudget={recentProjects[0]?.budget}
+              projectName={recentProjects[0]?.name || 'Selected Project'}
+              readOnly={true}
             />
           ) : (
-            <BudgetTracker />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Project Budget
+                </CardTitle>
+                <CardDescription>
+                  Select a project to view its budget details
+                </CardDescription>
+              </CardHeader>
+            </Card>
           )}
         </TabsContent>
 
@@ -936,6 +957,7 @@ export default function Dashboard() {
             <StakeholdersManager 
               projectId={selectedProjectId} 
               projectName={recentProjects[0]?.name || 'Selected Project'} 
+              readOnly={true}
             />
           ) : (
             <Card>
@@ -945,7 +967,7 @@ export default function Dashboard() {
                   Stakeholders Management
                 </CardTitle>
                 <CardDescription>
-                  Select a project to manage its stakeholders
+                  Select a project to view its stakeholders
                 </CardDescription>
               </CardHeader>
             </Card>

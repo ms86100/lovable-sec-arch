@@ -30,9 +30,10 @@ interface Stakeholder {
 interface StakeholdersManagerProps {
   projectId: string
   projectName: string
+  readOnly?: boolean
 }
 
-export function StakeholdersManager({ projectId, projectName }: StakeholdersManagerProps) {
+export function StakeholdersManager({ projectId, projectName, readOnly = false }: StakeholdersManagerProps) {
   const { user } = useAuth()
   const { toast } = useToast()
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>([])
@@ -219,13 +220,14 @@ export function StakeholdersManager({ projectId, projectName }: StakeholdersMana
           <p className="text-muted-foreground">Manage project stakeholders and team members for {projectName}</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true) }}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Stakeholder
-            </Button>
-          </DialogTrigger>
+        {!readOnly && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true) }}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Stakeholder
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
@@ -348,8 +350,9 @@ export function StakeholdersManager({ projectId, projectName }: StakeholdersMana
                 </Button>
               </DialogFooter>
             </form>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="grid gap-4">
@@ -403,22 +406,24 @@ export function StakeholdersManager({ projectId, projectName }: StakeholdersMana
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditDialog(stakeholder)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(stakeholder.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {!readOnly && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(stakeholder)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(stakeholder.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -431,6 +436,12 @@ export function StakeholdersManager({ projectId, projectName }: StakeholdersMana
               <p className="text-muted-foreground mb-4">
                 Start by adding team members and stakeholders to track roles and responsibilities
               </p>
+              {!readOnly && (
+                <Button onClick={() => { resetForm(); setIsDialogOpen(true) }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add First Stakeholder
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}

@@ -126,7 +126,7 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
       // Fetch team members
       const { data: teamData, error: teamError } = await supabase
         .from('project_team_members')
-        .select('id as user_id, name, email')
+        .select('id, name, email')
         .eq('project_id', projectId)
 
       if (teamError) throw teamError
@@ -134,7 +134,11 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
       setMilestones(milestonesData || [])
       setTasks(tasksData || [])
       setStakeholders(stakeholdersData || [])
-      setTeamMembers(teamData || [])
+      setTeamMembers(teamData?.map(member => ({
+        user_id: member.id,
+        name: member.name,
+        email: member.email
+      })) || [])
     } catch (error: any) {
       toast({
         title: "Error",
