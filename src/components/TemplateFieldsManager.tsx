@@ -44,7 +44,7 @@ export function TemplateFieldsManager({ templateId, onSuccess, onCancel }: Templ
   const [loading, setLoading] = useState(true)
   const [templateFields, setTemplateFields] = useState<TemplateField[]>([])
   const [availableFields, setAvailableFields] = useState<CustomField[]>([])
-  const [selectedFieldId, setSelectedFieldId] = useState('')
+  const [selectedFieldId, setSelectedFieldId] = useState<string | undefined>(undefined)
   const [templateName, setTemplateName] = useState('')
   const [showFieldForm, setShowFieldForm] = useState(false)
 
@@ -127,7 +127,7 @@ export function TemplateFieldsManager({ templateId, onSuccess, onCancel }: Templ
         description: "Field has been added to the template."
       })
       
-      setSelectedFieldId('')
+      setSelectedFieldId(undefined)
       fetchData()
     } catch (error: any) {
       toast({

@@ -418,7 +418,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Product</label>
-              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+               <Select value={selectedProductId || 'all'} onValueChange={setSelectedProductId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
                 </SelectTrigger>
@@ -436,7 +436,7 @@ export default function Dashboard() {
             <div className="space-y-2">
               <label className="text-sm font-medium">Project</label>
               <Select 
-                value={selectedProjectId} 
+                value={selectedProjectId || 'all'} 
                 onValueChange={setSelectedProjectId}
                 disabled={!selectedProductId || selectedProductId === 'all'}
               >
@@ -677,7 +677,7 @@ export default function Dashboard() {
                           className="pl-9 w-full sm:w-64"
                         />
                       </div>
-                      <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <Select value={filterStatus || 'all'} onValueChange={setFilterStatus}>
                         <SelectTrigger className="w-full sm:w-32">
                           <SelectValue placeholder="Status" />
                         </SelectTrigger>
@@ -690,7 +690,7 @@ export default function Dashboard() {
                           <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Select value={filterPriority} onValueChange={setFilterPriority}>
+                      <Select value={filterPriority || 'all'} onValueChange={setFilterPriority}>
                         <SelectTrigger className="w-full sm:w-32">
                           <SelectValue placeholder="Priority" />
                         </SelectTrigger>
