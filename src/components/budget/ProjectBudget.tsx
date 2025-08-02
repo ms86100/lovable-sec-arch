@@ -53,7 +53,7 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
   const [editingItem, setEditingItem] = useState<BudgetItem | null>(null)
 
   const [formData, setFormData] = useState({
-    category: 'labor',
+    category: 'Development',
     item_name: '',
     planned_amount: '',
     actual_amount: '',
@@ -130,7 +130,7 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
 
   const resetForm = () => {
     setFormData({
-      category: 'labor',
+      category: 'Development',
       item_name: '',
       planned_amount: '',
       actual_amount: '',
@@ -381,14 +381,23 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="labor">Labor</SelectItem>
-                            <SelectItem value="materials">Materials</SelectItem>
-                            <SelectItem value="equipment">Equipment</SelectItem>
-                            <SelectItem value="software">Software</SelectItem>
-                            <SelectItem value="travel">Travel</SelectItem>
-                            <SelectItem value="training">Training</SelectItem>
-                            <SelectItem value="consulting">Consulting</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="Development">Development</SelectItem>
+                            <SelectItem value="Enhancement">Enhancement</SelectItem>
+                            <SelectItem value="Bug Fixing">Bug Fixing</SelectItem>
+                            <SelectItem value="Adaptive Maintenance">Adaptive Maintenance</SelectItem>
+                            <SelectItem value="Corrective Maintenance">Corrective Maintenance</SelectItem>
+                            <SelectItem value="Preventive Maintenance">Preventive Maintenance</SelectItem>
+                            <SelectItem value="Predictive Maintenance">Predictive Maintenance</SelectItem>
+                            <SelectItem value="Obsolescence">Obsolescence</SelectItem>
+                            <SelectItem value="Run Mode / BAU">Run Mode / BAU (Business As Usual)</SelectItem>
+                            <SelectItem value="Compliance & Security">Compliance & Security</SelectItem>
+                            <SelectItem value="Infrastructure / Hosting">Infrastructure / Hosting</SelectItem>
+                            <SelectItem value="Licensing">Licensing</SelectItem>
+                            <SelectItem value="Training & Enablement">Training & Enablement</SelectItem>
+                            <SelectItem value="Monitoring & Support">Monitoring & Support</SelectItem>
+                            <SelectItem value="Documentation">Documentation</SelectItem>
+                            <SelectItem value="Change Request (CR)">Change Request (CR)</SelectItem>
+                            <SelectItem value="Transition / Handover">Transition / Handover</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

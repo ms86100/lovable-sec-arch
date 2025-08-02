@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react'
 import { format } from 'date-fns'
@@ -38,7 +39,7 @@ export function BudgetSpending({ projectId, readOnly = false }: BudgetSpendingPr
   const [editingItem, setEditingItem] = useState<SpendingItem | null>(null)
 
   const [formData, setFormData] = useState({
-    category: '',
+    category: 'Development',
     item_name: '',
     description: '',
     actual_amount: 0,
@@ -80,7 +81,7 @@ export function BudgetSpending({ projectId, readOnly = false }: BudgetSpendingPr
 
   const resetForm = () => {
     setFormData({
-      category: '',
+      category: 'Development',
       item_name: '',
       description: '',
       actual_amount: 0,
@@ -242,13 +243,30 @@ export function BudgetSpending({ projectId, readOnly = false }: BudgetSpendingPr
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="category">Category *</Label>
-                      <Input
-                        id="category"
-                        value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        placeholder="e.g., Development, Marketing"
-                        required
-                      />
+                      <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Development">Development</SelectItem>
+                          <SelectItem value="Enhancement">Enhancement</SelectItem>
+                          <SelectItem value="Bug Fixing">Bug Fixing</SelectItem>
+                          <SelectItem value="Adaptive Maintenance">Adaptive Maintenance</SelectItem>
+                          <SelectItem value="Corrective Maintenance">Corrective Maintenance</SelectItem>
+                          <SelectItem value="Preventive Maintenance">Preventive Maintenance</SelectItem>
+                          <SelectItem value="Predictive Maintenance">Predictive Maintenance</SelectItem>
+                          <SelectItem value="Obsolescence">Obsolescence</SelectItem>
+                          <SelectItem value="Run Mode / BAU">Run Mode / BAU (Business As Usual)</SelectItem>
+                          <SelectItem value="Compliance & Security">Compliance & Security</SelectItem>
+                          <SelectItem value="Infrastructure / Hosting">Infrastructure / Hosting</SelectItem>
+                          <SelectItem value="Licensing">Licensing</SelectItem>
+                          <SelectItem value="Training & Enablement">Training & Enablement</SelectItem>
+                          <SelectItem value="Monitoring & Support">Monitoring & Support</SelectItem>
+                          <SelectItem value="Documentation">Documentation</SelectItem>
+                          <SelectItem value="Change Request (CR)">Change Request (CR)</SelectItem>
+                          <SelectItem value="Transition / Handover">Transition / Handover</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="amount">Amount Spent *</Label>
