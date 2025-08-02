@@ -22,27 +22,11 @@ export function CPMGanttChart({ tasks, criticalPath, projectDuration }: CPMGantt
         </p>
       </div>
       
-      {/* Timeline Header */}
+      {/* Header */}
       <div className="border-b bg-gray-50">
         <div className="flex">
           <div className="w-48 p-3 border-r font-medium">Task</div>
-          <div className="flex-1 p-3">
-            <div className="relative">
-              <div className="flex justify-between text-xs text-gray-600">
-                {Array.from({ length: Math.min(Math.ceil(projectDuration / 5) + 1, 10) }, (_, i) => i * 5).map(day => (
-                  <span key={day} className="text-center">
-                    Day {day}
-                  </span>
-                ))}
-              </div>
-              {/* Grid lines */}
-              <div className="absolute top-6 left-0 right-0 flex justify-between">
-                {Array.from({ length: Math.min(Math.ceil(projectDuration / 5) + 1, 10) }, (_, i) => i * 5).map(day => (
-                  <div key={day} className="w-px bg-gray-200 h-4"></div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <div className="flex-1 p-3 font-medium">Timeline</div>
         </div>
       </div>
       
