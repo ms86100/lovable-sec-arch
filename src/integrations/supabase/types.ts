@@ -842,6 +842,7 @@ export type Database = {
           description: string | null
           end_date: string | null
           id: string
+          is_active: boolean | null
           name: string
           priority: string
           product_id: string
@@ -860,6 +861,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
           priority?: string
           product_id: string
@@ -878,6 +880,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
           priority?: string
           product_id?: string

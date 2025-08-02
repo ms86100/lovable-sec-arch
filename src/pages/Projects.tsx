@@ -92,6 +92,7 @@ const Projects = () => {
             owner_id
           )
         `)
+        .eq('is_active', true) // Only show active projects
         
       // Apply product filter if specified
       if (productFilter) {
@@ -177,7 +178,10 @@ const Projects = () => {
               {productFilter ? 'Projects filtered by selected product' : 'Manage and monitor all your projects'}
             </p>
           </div>
-          <Button className="bg-primary hover:bg-primary/90">
+          <Button 
+            className="bg-primary hover:bg-primary/90"
+            onClick={() => navigate('/projects/new')}
+          >
             <Plus className="w-4 h-4 mr-2" />
             New Project
           </Button>

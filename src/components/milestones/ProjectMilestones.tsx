@@ -31,9 +31,10 @@ interface Task {
 
 interface ProjectMilestonesProps {
   projectId: string | null
+  readOnly?: boolean
 }
 
-export function ProjectMilestones({ projectId }: ProjectMilestonesProps) {
+export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilestonesProps) {
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -210,10 +211,12 @@ export function ProjectMilestones({ projectId }: ProjectMilestonesProps) {
               Track project milestones and their associated tasks
             </CardDescription>
           </div>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Milestone
-          </Button>
+          {!readOnly && (
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Milestone
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -259,10 +262,12 @@ export function ProjectMilestones({ projectId }: ProjectMilestonesProps) {
                   <div className="mt-4 pt-4 border-t">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-medium text-sm">Tasks</h4>
-                      <Button size="sm" variant="outline">
-                        <Plus className="h-3 w-3 mr-1" />
-                        Add Task
-                      </Button>
+                      {!readOnly && (
+                        <Button size="sm" variant="outline">
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Task
+                        </Button>
+                      )}
                     </div>
                     <div className="space-y-2">
                       {milestone.tasks.map((task) => (

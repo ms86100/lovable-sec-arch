@@ -28,9 +28,10 @@ interface BudgetSummary {
 interface ProjectBudgetProps {
   projectId: string | null
   projectBudget?: number
+  readOnly?: boolean
 }
 
-export function ProjectBudget({ projectId, projectBudget }: ProjectBudgetProps) {
+export function ProjectBudget({ projectId, projectBudget, readOnly = false }: ProjectBudgetProps) {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([])
   const [summary, setSummary] = useState<BudgetSummary>({
     totalPlanned: 0,
@@ -234,10 +235,12 @@ export function ProjectBudget({ projectId, projectBudget }: ProjectBudgetProps) 
                 Detailed breakdown of planned vs actual spending
               </CardDescription>
             </div>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Budget Item
-            </Button>
+            {!readOnly && (
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Budget Item
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
