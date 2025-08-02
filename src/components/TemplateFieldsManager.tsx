@@ -44,7 +44,7 @@ export function TemplateFieldsManager({ templateId, onSuccess, onCancel }: Templ
   const [loading, setLoading] = useState(true)
   const [templateFields, setTemplateFields] = useState<TemplateField[]>([])
   const [availableFields, setAvailableFields] = useState<CustomField[]>([])
-  const [selectedFieldId, setSelectedFieldId] = useState<string | undefined>(undefined)
+  const [selectedFieldId, setSelectedFieldId] = useState<string>('')
   const [templateName, setTemplateName] = useState('')
   const [showFieldForm, setShowFieldForm] = useState(false)
 
@@ -127,7 +127,7 @@ export function TemplateFieldsManager({ templateId, onSuccess, onCancel }: Templ
         description: "Field has been added to the template."
       })
       
-      setSelectedFieldId(undefined)
+      setSelectedFieldId('')
       fetchData()
     } catch (error: any) {
       toast({
@@ -249,6 +249,7 @@ export function TemplateFieldsManager({ templateId, onSuccess, onCancel }: Templ
                 <SelectValue placeholder="Select a field to add" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Select a field...</SelectItem>
                 {availableFields.map((field) => (
                   <SelectItem key={field.id} value={field.id}>
                     {field.name} ({field.field_type})

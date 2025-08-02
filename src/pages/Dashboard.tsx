@@ -87,7 +87,6 @@ interface Product {
 }
 
 export default function Dashboard() {
-  console.log('Dashboard component rendering...')
   const { user, userRole, hasRole } = useAuth()
   const navigate = useNavigate()
   const [stats, setStats] = useState<DashboardStats>({
@@ -137,7 +136,6 @@ export default function Dashboard() {
   }, [selectedProjectId])
 
   const fetchDashboardData = async () => {
-    console.log('fetchDashboardData called')
     try {
       // Fetch products count
       const { count: productsCount } = await supabase
@@ -221,7 +219,6 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {
-      console.log('fetchDashboardData completed, setting loading to false')
       setLoading(false)
     }
   }
@@ -360,10 +357,7 @@ export default function Dashboard() {
     }
   }
 
-  console.log('Dashboard loading state:', loading)
-  
   if (loading) {
-    console.log('Dashboard showing loading state')
     return (
       <div className="space-y-6 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -381,8 +375,6 @@ export default function Dashboard() {
       </div>
     )
   }
-
-  console.log('Dashboard rendering main content, user:', user, 'userRole:', userRole)
 
   return (
     <div className="space-y-6 p-6 animate-fade-in">
