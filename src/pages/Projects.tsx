@@ -33,12 +33,9 @@ interface Project {
   start_date: string | null;
   end_date: string | null;
   created_at: string;
-  product: {
+  products: {
     name: string;
-    owner: {
-      first_name: string | null;
-      last_name: string | null;
-    } | null;
+    owner_id: string;
   } | null;
 }
 
@@ -87,12 +84,9 @@ const Projects = () => {
         .from('projects')
         .select(`
           *,
-          product:products(
+          products (
             name,
-            owner:profiles!products_owner_id_fkey(
-              first_name,
-              last_name
-            )
+            owner_id
           )
         `)
         .order('created_at', { ascending: false });
@@ -275,20 +269,15 @@ const Projects = () => {
                       <GitBranch className="w-3 h-3 mr-1" />
                       Product
                     </div>
-                    <span className="text-foreground">{project.product?.name || 'N/A'}</span>
+                    <span className="text-foreground">{project.products?.name || 'N/A'}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-muted-foreground">
                       <Users className="w-3 h-3 mr-1" />
-                      Owner
+                      Project ID
                     </div>
-                    <span className="text-foreground">
-                      {project.product?.owner 
-                        ? `${project.product.owner.first_name} ${project.product.owner.last_name}`
-                        : 'N/A'
-                      }
-                    </span>
+                    <span className="text-foreground text-xs">{project.id.slice(0, 8)}...</span>
                   </div>
                 </div>
 
