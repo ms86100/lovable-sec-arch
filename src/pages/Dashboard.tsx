@@ -28,7 +28,7 @@ import {
   BarChart3,
   Zap,
   Shield,
-  Timeline,
+  BarChart,
   Eye
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -36,6 +36,7 @@ import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
 import ProjectTimeline from '@/components/timeline/ProjectTimeline'
 import RiskDashboard from '@/components/risks/RiskDashboard'
 import RACIMatrix from '@/components/raci/RACIMatrix'
+import PerformanceDashboard from '@/components/performance/PerformanceDashboard'
 
 interface DashboardStats {
   totalProducts: number
@@ -412,13 +413,13 @@ export default function Dashboard() {
 
       {/* Enhanced Dashboard with Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full lg:w-auto lg:grid-cols-4">
+        <TabsList className="grid w-full lg:w-auto lg:grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="timeline" className="flex items-center gap-2">
-            <Timeline className="w-4 h-4" />
+            <BarChart className="w-4 h-4" />
             Timeline
           </TabsTrigger>
           <TabsTrigger value="risks" className="flex items-center gap-2">
@@ -428,6 +429,10 @@ export default function Dashboard() {
           <TabsTrigger value="raci" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             RACI Matrix
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            Performance
           </TabsTrigger>
         </TabsList>
 
@@ -504,179 +509,181 @@ export default function Dashboard() {
                               </Badge>
                             </div>
                         
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
-                          <div className="flex items-center">
-                            <Package className="w-3 h-3 mr-1" />
-                            {project.products.name}
-                          </div>
-                          {project.assigned_to && (
-                            <div className="flex items-center">
-                              <Users className="w-3 h-3 mr-1" />
-                              Assigned
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
+                              <div className="flex items-center">
+                                <Package className="w-3 h-3 mr-1" />
+                                {project.products.name}
+                              </div>
+                              {project.assigned_to && (
+                                <div className="flex items-center">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  Assigned
+                                </div>
+                              )}
+                              <div className="flex items-center">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                {format(new Date(project.created_at), 'MMM dd, yyyy')}
+                              </div>
+                              {project.start_date && (
+                                <div className="flex items-center">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  Due: {format(new Date(project.start_date), 'MMM dd')}
+                                </div>
+                              )}
                             </div>
-                          )}
-                          <div className="flex items-center">
-                            <Calendar className="w-3 h-3 mr-1" />
-                            {format(new Date(project.created_at), 'MMM dd, yyyy')}
-                          </div>
-                          {project.start_date && (
-                            <div className="flex items-center">
-                              <Clock className="w-3 h-3 mr-1" />
-                              Due: {format(new Date(project.start_date), 'MMM dd')}
+                            
+                            <div className="flex items-center gap-3">
+                              <Progress value={project.progress} className="flex-1" />
+                              <span className="text-sm font-medium w-12">{project.progress}%</span>
                             </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <Progress value={project.progress} className="flex-1" />
-                          <span className="text-sm font-medium w-12">{project.progress}%</span>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                        {searchTerm || filterStatus !== 'all' || filterPriority !== 'all' 
+                          ? 'No projects match your filters' 
+                          : 'No projects yet'}
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        {searchTerm || filterStatus !== 'all' || filterPriority !== 'all'
+                          ? 'Try adjusting your search or filter criteria'
+                          : 'Create your first product to start managing projects'}
+                      </p>
+                      {canCreateProducts && !searchTerm && filterStatus === 'all' && filterPriority === 'all' && (
+                        <Button onClick={() => navigate('/products')}>
+                          <Package className="w-4 h-4 mr-2" />
+                          Create Product
+                        </Button>
+                      )}
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                    {searchTerm || filterStatus !== 'all' || filterPriority !== 'all' 
-                      ? 'No projects match your filters' 
-                      : 'No projects yet'}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {searchTerm || filterStatus !== 'all' || filterPriority !== 'all'
-                      ? 'Try adjusting your search or filter criteria'
-                      : 'Create your first product to start managing projects'}
-                  </p>
-                  {canCreateProducts && !searchTerm && filterStatus === 'all' && filterPriority === 'all' && (
-                    <Button onClick={() => navigate('/products')}>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar - Quick Actions & Activity */}
+            <div className="space-y-6">
+              {/* Quick Actions */}
+              <Card className="airbus-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Zap className="w-4 h-4 mr-2" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {canCreateProducts && (
+                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/products')}>
                       <Package className="w-4 h-4 mr-2" />
-                      Create Product
+                      Manage Products
                     </Button>
                   )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/projects')}>
+                    <FolderOpen className="w-4 h-4 mr-2" />
+                    View Projects
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/templates')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Project Templates
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Analytics
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Users className="w-4 h-4 mr-2" />
+                    Team Management
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Button>
+                </CardContent>
+              </Card>
 
-        {/* Sidebar - Quick Actions & Activity */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Zap className="w-4 h-4 mr-2" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {canCreateProducts && (
-                <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/products')}>
-                  <Package className="w-4 h-4 mr-2" />
-                  Manage Products
-                </Button>
-              )}
-              <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/projects')}>
-                <FolderOpen className="w-4 h-4 mr-2" />
-                View Projects
-              </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/templates')}>
-                <FileText className="w-4 h-4 mr-2" />
-                Project Templates
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Analytics
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Users className="w-4 h-4 mr-2" />
-                Team Management
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-            </CardContent>
-          </Card>
+              {/* Recent Activity */}
+              <Card className="airbus-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Activity className="w-4 h-4 mr-2" />
+                    Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {recentActivity.length > 0 ? (
+                    recentActivity.map((activity, index) => (
+                      <div key={activity.id} className="flex items-start space-x-3 p-2 rounded hover:bg-muted/50">
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{activity.project_name}</p>
+                          <p className="text-xs text-muted-foreground">{activity.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(activity.timestamp), 'MMM dd, HH:mm')}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <Activity className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No recent activity</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          {/* Recent Activity */}
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Activity className="w-4 h-4 mr-2" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {recentActivity.length > 0 ? (
-                recentActivity.map((activity, index) => (
-                  <div key={activity.id} className="flex items-start space-x-3 p-2 rounded hover:bg-muted/50">
-                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{activity.project_name}</p>
-                      <p className="text-xs text-muted-foreground">{activity.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(activity.timestamp), 'MMM dd, HH:mm')}
+              {/* Role Info */}
+              <Card className="airbus-card">
+                <CardHeader>
+                  <CardTitle>Access Level</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 border-l-4 border-l-primary bg-primary/5 rounded">
+                    <p className="text-sm font-medium">Role: {userRole?.role?.toUpperCase()}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {userRole?.role === 'admin' && 'Full system access with all administrative privileges'}
+                      {userRole?.role === 'manager' && 'Can create and manage products and projects'}
+                      {userRole?.role === 'viewer' && 'Read-only access to assigned projects'}
+                    </p>
+                  </div>
+                  
+                  {userRole?.role === 'viewer' && (
+                    <div className="p-3 border-l-4 border-l-warning bg-warning/5 rounded">
+                      <p className="text-sm font-medium">Limited Access</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Contact an admin to request elevated permissions
                       </p>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-4">
-                  <Activity className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">No recent activity</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Role Info */}
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle>Access Level</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="p-3 border-l-4 border-l-primary bg-primary/5 rounded">
-                <p className="text-sm font-medium">Role: {userRole?.role?.toUpperCase()}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {userRole?.role === 'admin' && 'Full system access with all administrative privileges'}
-                  {userRole?.role === 'manager' && 'Can create and manage products and projects'}
-                  {userRole?.role === 'viewer' && 'Read-only access to assigned projects'}
-                </p>
-              </div>
-              
-              {userRole?.role === 'viewer' && (
-                <div className="p-3 border-l-4 border-l-yellow-500 bg-yellow-500/5 rounded">
-                  <p className="text-sm font-medium">Limited Access</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Contact an admin to request elevated permissions
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </Card>
-        </div>
-      </div>
-    </TabsContent>
+          </div>
+        </TabsContent>
 
-    <TabsContent value="timeline" className="space-y-6">
-      <ProjectTimeline 
-        projects={recentProjects} 
-        onProjectClick={(projectId) => navigate(`/projects/${projectId}`)} 
-      />
-    </TabsContent>
+        <TabsContent value="timeline" className="space-y-6">
+          <ProjectTimeline 
+            projects={recentProjects} 
+            onProjectClick={(projectId) => navigate(`/projects/${projectId}`)} 
+          />
+        </TabsContent>
 
-    <TabsContent value="risks" className="space-y-6">
-      <RiskDashboard />
-    </TabsContent>
+        <TabsContent value="risks" className="space-y-6">
+          <RiskDashboard />
+        </TabsContent>
 
-    <TabsContent value="raci" className="space-y-6">
-      <RACIMatrix showAllProjects={true} />
-    </TabsContent>
-  </Tabs>
-</div>
+        <TabsContent value="raci" className="space-y-6">
+          <RACIMatrix showAllProjects={true} />
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-6">
+          <PerformanceDashboard timeframe="month" />
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
