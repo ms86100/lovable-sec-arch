@@ -77,11 +77,15 @@ export function TemplateFieldsManager({ templateId, onSuccess, onCancel }: Templ
 
       // Fetch available custom fields not in this template
       const usedFieldIds = fields?.map(f => f.custom_field_id) || []
-      const { data: available, error: availableError } = await supabase
+      let availableQuery = supabase
         .from('custom_fields')
         .select('*')
-        .not('id', 'in', `(${usedFieldIds.join(',') || 'null'})`)
-        .order('name')
+      
+      if (usedFieldIds.length > 0) {
+        availableQuery = availableQuery.not('id', 'in', `(${usedFieldIds.join(',')})`)
+      }
+      
+      const { data: available, error: availableError } = await availableQuery.order('name')
 
       if (availableError) throw availableError
       setAvailableFields(available || [])
