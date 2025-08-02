@@ -11,7 +11,7 @@ import { StakeholdersManager } from '@/components/stakeholders/StakeholdersManag
 import { InfrastructureManager } from '@/components/infrastructure/InfrastructureManager'
 import { RiskManager } from '@/components/risks/RiskManager'
 import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
-import { BudgetTracker } from '@/components/budget/BudgetTracker'
+import { ProjectBudget } from '@/components/budget/ProjectBudget'
 import { SecurityCompliance } from '@/components/security/SecurityCompliance'
 import { ProjectDocumentation } from '@/components/documentation/ProjectDocumentation'
 import { ProjectForm } from '@/components/forms/ProjectForm'
@@ -391,7 +391,7 @@ const ProjectDetails = () => {
           </TabsContent>
 
           <TabsContent value="budget" className="space-y-6">
-            <BudgetTracker projectId={project.id} projectName={project.name} />
+            <ProjectBudget projectId={project.id} projectBudget={project.budget} />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
