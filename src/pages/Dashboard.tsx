@@ -445,7 +445,7 @@ export default function Dashboard() {
               {filteredProjects.length > 0 ? (
                 filteredProjects.map((project) => (
                   <div key={project.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                       onClick={() => navigate('/projects')}>
+                       onClick={() => navigate(`/projects/${project.id}`)}>
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">

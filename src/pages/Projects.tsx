@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,8 +45,11 @@ const Projects = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const productFilter = searchParams.get('product');
 
   useEffect(() => {
     if (user) {
@@ -55,7 +58,7 @@ const Projects = () => {
       console.log('No user found, not fetching projects');
       setLoading(false);
     }
-  }, [user]);
+  }, [user, productFilter]);
 
   const fetchProjects = async () => {
     try {
@@ -80,7 +83,7 @@ const Projects = () => {
         return;
       }
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('projects')
         .select(`
           *,
@@ -89,7 +92,13 @@ const Projects = () => {
             owner_id
           )
         `)
-        .order('created_at', { ascending: false });
+        
+      // Apply product filter if specified
+      if (productFilter) {
+        query = query.eq('product_id', productFilter)
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       console.log('Query result:', { data, error });
 
@@ -164,7 +173,9 @@ const Projects = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Projects</h1>
-            <p className="text-muted-foreground">Manage and monitor all your projects</p>
+            <p className="text-muted-foreground">
+              {productFilter ? 'Projects filtered by selected product' : 'Manage and monitor all your projects'}
+            </p>
           </div>
           <Button className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />

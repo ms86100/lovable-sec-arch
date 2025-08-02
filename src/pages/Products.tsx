@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ interface Product {
 export default function Products() {
   const { user, hasRole } = useAuth()
   const { toast } = useToast()
+  const navigate = useNavigate()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -277,7 +279,8 @@ export default function Products() {
 
                 {/* Stats */}
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors"
+                       onClick={(e) => { e.stopPropagation(); navigate(`/projects?product=${product.id}`) }}>
                     <FolderOpen className="w-4 h-4" />
                     {product.project_count} projects
                   </div>
