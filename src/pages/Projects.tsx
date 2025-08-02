@@ -60,27 +60,40 @@ const Projects = () => {
     }
   }, [user, productFilter]);
 
+  const validateProductFilter = async (productId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name')
+        .eq('id', productId)
+        .single();
+      
+      return { isValid: !error && data, productName: data?.name };
+    } catch {
+      return { isValid: false, productName: null };
+    }
+  };
+
   const fetchProjects = async () => {
     try {
       console.log('Starting to fetch projects...');
       console.log('Current user:', user);
-      console.log('Auth state:', await supabase.auth.getUser());
+      console.log('Product filter:', productFilter);
       
-      // Try simple query first
-      const { data: simpleData, error: simpleError } = await supabase
-        .from('projects')
-        .select('*')
-        .limit(5);
-      
-      console.log('Simple query result:', { simpleData, simpleError });
-      
-      if (simpleError) {
-        toast({
-          title: "Error",
-          description: `Database access error: ${simpleError.message}`,
-          variant: "destructive",
-        });
-        return;
+      // Validate product filter if provided
+      if (productFilter) {
+        const { isValid, productName } = await validateProductFilter(productFilter);
+        if (!isValid) {
+          toast({
+            title: "Invalid Product Filter",
+            description: `Product with ID ${productFilter} not found or you don't have access to it. Showing all projects instead.`,
+            variant: "destructive",
+          });
+          // Clear the invalid product filter from URL
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('product');
+          window.history.replaceState({}, '', newUrl.toString());
+        }
       }
       
       let query = supabase
@@ -94,9 +107,12 @@ const Projects = () => {
         `)
         .eq('is_active', true) // Only show active projects
         
-      // Apply product filter if specified
+      // Apply product filter if specified and valid
       if (productFilter) {
-        query = query.eq('product_id', productFilter)
+        const { isValid } = await validateProductFilter(productFilter);
+        if (isValid) {
+          query = query.eq('product_id', productFilter)
+        }
       }
       
       const { data, error } = await query.order('created_at', { ascending: false });
