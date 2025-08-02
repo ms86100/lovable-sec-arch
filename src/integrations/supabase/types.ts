@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_fields: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_value: string | null
+          dropdown_options: string[] | null
+          field_key: string
+          field_type: string
+          help_text: string | null
+          id: string
+          is_required: boolean | null
+          name: string
+          updated_at: string
+          updated_by: string | null
+          validation_rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_value?: string | null
+          dropdown_options?: string[] | null
+          field_key: string
+          field_type: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean | null
+          name: string
+          updated_at?: string
+          updated_by?: string | null
+          validation_rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_value?: string | null
+          dropdown_options?: string[] | null
+          field_key?: string
+          field_type?: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean | null
+          name?: string
+          updated_at?: string
+          updated_by?: string | null
+          validation_rules?: Json | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           created_at: string
@@ -83,6 +131,81 @@ export type Database = {
         }
         Relationships: []
       }
+      project_custom_values: {
+        Row: {
+          created_at: string
+          custom_field_id: string
+          field_value: string | null
+          id: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_field_id: string
+          field_value?: string | null
+          id?: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_field_id?: string
+          field_value?: string | null
+          id?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_custom_values_custom_field_id_fkey"
+            columns: ["custom_field_id"]
+            isOneToOne: false
+            referencedRelation: "custom_fields"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_custom_values_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           assigned_to: string | null
@@ -98,6 +221,7 @@ export type Database = {
           progress: number | null
           start_date: string | null
           status: string
+          template_id: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -115,6 +239,7 @@ export type Database = {
           progress?: number | null
           start_date?: string | null
           status?: string
+          template_id?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -132,6 +257,7 @@ export type Database = {
           progress?: number | null
           start_date?: string | null
           status?: string
+          template_id?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -141,6 +267,55 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_fields: {
+        Row: {
+          custom_field_id: string
+          field_order: number | null
+          id: string
+          is_required_in_template: boolean | null
+          template_default_value: string | null
+          template_id: string
+        }
+        Insert: {
+          custom_field_id: string
+          field_order?: number | null
+          id?: string
+          is_required_in_template?: boolean | null
+          template_default_value?: string | null
+          template_id: string
+        }
+        Update: {
+          custom_field_id?: string
+          field_order?: number | null
+          id?: string
+          is_required_in_template?: boolean | null
+          template_default_value?: string | null
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_fields_custom_field_id_fkey"
+            columns: ["custom_field_id"]
+            isOneToOne: false
+            referencedRelation: "custom_fields"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_fields_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "project_templates"
             referencedColumns: ["id"]
           },
         ]
