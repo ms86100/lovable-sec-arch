@@ -889,6 +889,10 @@ export default function Dashboard() {
             <BarChartIcon className="w-4 h-4" />
             Timeline
           </TabsTrigger>
+          <TabsTrigger value="cpm" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            Critical Path
+          </TabsTrigger>
           <TabsTrigger value="risks" className="flex items-center gap-2">
             <Shield className="w-4 h-4" />
             Risk Management
