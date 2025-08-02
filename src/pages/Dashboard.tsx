@@ -37,6 +37,9 @@ import ProjectTimeline from '@/components/timeline/ProjectTimeline'
 import RiskDashboard from '@/components/risks/RiskDashboard'
 import RACIMatrix from '@/components/raci/RACIMatrix'
 import PerformanceDashboard from '@/components/performance/PerformanceDashboard'
+import ResourceManager from '@/components/resources/ResourceManager'
+import BudgetTracker from '@/components/budget/BudgetTracker'
+import AdvancedAnalytics from '@/components/analytics/AdvancedAnalytics'
 
 interface DashboardStats {
   totalProducts: number
@@ -413,7 +416,7 @@ export default function Dashboard() {
 
       {/* Enhanced Dashboard with Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full lg:w-auto lg:grid-cols-5">
+        <TabsList className="grid w-full lg:w-auto lg:grid-cols-8">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Overview
@@ -433,6 +436,18 @@ export default function Dashboard() {
           <TabsTrigger value="performance" className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
             Performance
+          </TabsTrigger>
+          <TabsTrigger value="resources" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Resources
+          </TabsTrigger>
+          <TabsTrigger value="budget" className="flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            Budget
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Analytics
           </TabsTrigger>
         </TabsList>
 
@@ -682,6 +697,18 @@ export default function Dashboard() {
 
         <TabsContent value="performance" className="space-y-6">
           <PerformanceDashboard timeframe="month" />
+        </TabsContent>
+
+        <TabsContent value="resources" className="space-y-6">
+          <ResourceManager />
+        </TabsContent>
+
+        <TabsContent value="budget" className="space-y-6">
+          <BudgetTracker />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <AdvancedAnalytics />
         </TabsContent>
       </Tabs>
     </div>
