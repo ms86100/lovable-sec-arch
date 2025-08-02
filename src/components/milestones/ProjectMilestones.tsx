@@ -27,6 +27,7 @@ interface Task {
   due_date: string | null
   status: string
   priority: string
+  progress: number
 }
 
 interface ProjectMilestonesProps {
@@ -118,6 +119,14 @@ export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilest
     } finally {
       setLoading(false)
     }
+  }
+
+  // Calculate milestone progress based on task progress
+  const calculateMilestoneProgress = (tasks: Task[]) => {
+    if (tasks.length === 0) return 0
+    
+    const totalProgress = tasks.reduce((sum, task) => sum + (task.progress || 0), 0)
+    return Math.round(totalProgress / tasks.length)
   }
 
   const getStatusIcon = (status: string) => {
@@ -230,33 +239,36 @@ export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilest
           <div className="space-y-6">
             {milestones.map((milestone) => (
               <div key={milestone.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      {getStatusIcon(milestone.status)}
-                      <h3 className="font-semibold">{milestone.title}</h3>
-                      <Badge className={getStatusColor(milestone.status)}>
-                        {milestone.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                    {milestone.description && (
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {milestone.description}
-                      </p>
-                    )}
-                    {milestone.due_date && (
-                      <p className="text-sm text-muted-foreground">
-                        Due: {new Date(milestone.due_date).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium mb-1">
-                      {milestone.progress}% Complete
-                    </div>
-                    <Progress value={milestone.progress} className="w-24" />
-                  </div>
-                </div>
+                 <div className="flex items-start justify-between mb-3">
+                   <div className="flex-1">
+                     <div className="flex items-center gap-2 mb-1">
+                       {getStatusIcon(milestone.status)}
+                       <h3 className="font-semibold">{milestone.title}</h3>
+                       <Badge className={getStatusColor(milestone.status)}>
+                         {milestone.status.replace('_', ' ')}
+                       </Badge>
+                     </div>
+                     {milestone.description && (
+                       <p className="text-sm text-muted-foreground mb-2">
+                         {milestone.description}
+                       </p>
+                     )}
+                     {milestone.due_date && (
+                       <p className="text-sm text-muted-foreground">
+                         Due: {new Date(milestone.due_date).toLocaleDateString()}
+                       </p>
+                     )}
+                   </div>
+                   <div className="text-right">
+                     <div className="text-sm font-medium mb-1">
+                       {calculateMilestoneProgress(milestone.tasks || [])}% Complete
+                       {(!milestone.tasks || milestone.tasks.length === 0) && (
+                         <span className="text-xs text-muted-foreground ml-1">(No tasks)</span>
+                       )}
+                     </div>
+                     <Progress value={calculateMilestoneProgress(milestone.tasks || [])} className="w-24" />
+                   </div>
+                 </div>
 
                 {milestone.tasks && milestone.tasks.length > 0 && (
                   <div className="mt-4 pt-4 border-t">
@@ -279,14 +291,15 @@ export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilest
                               {task.priority}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            {task.owner_name && (
-                              <span>{task.owner_name}</span>
-                            )}
-                            {task.due_date && (
-                              <span>{new Date(task.due_date).toLocaleDateString()}</span>
-                            )}
-                          </div>
+                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                             {task.owner_name && (
+                               <span>{task.owner_name}</span>
+                             )}
+                             {task.due_date && (
+                               <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                             )}
+                             <span>Progress: {task.progress || 0}%</span>
+                           </div>
                         </div>
                       ))}
                     </div>

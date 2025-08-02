@@ -78,7 +78,6 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
     title: '',
     description: '',
     status: 'pending',
-    progress: 0,
     due_date: undefined as Date | undefined
   })
 
@@ -164,7 +163,6 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
       title: '',
       description: '',
       status: 'pending',
-      progress: 0,
       due_date: undefined
     })
     setEditingMilestone(null)
@@ -196,7 +194,7 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
         title: milestoneForm.title,
         description: milestoneForm.description || null,
         status: milestoneForm.status,
-        progress: milestoneForm.progress,
+        progress: 0, // Will be auto-calculated from tasks
         due_date: milestoneForm.due_date ? format(milestoneForm.due_date, 'yyyy-MM-dd') : null,
         created_by: user?.id,
         updated_by: user?.id
@@ -303,6 +301,9 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
 
       setTaskDialogOpen(false)
       resetTaskForm()
+      
+      // Update milestone progress and then fetch all data
+      await updateMilestoneProgress(selectedMilestone)
       fetchData()
     } catch (error: any) {
       toast({
@@ -319,7 +320,6 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
       title: milestone.title,
       description: milestone.description || '',
       status: milestone.status,
-      progress: milestone.progress,
       due_date: milestone.due_date ? new Date(milestone.due_date) : undefined
     })
     setMilestoneDialogOpen(true)
@@ -385,6 +385,11 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
         description: "Task deleted successfully"
       })
 
+      // Update milestone progress and then fetch all data
+      const deletedTask = tasks.find(t => t.id === id)
+      if (deletedTask) {
+        await updateMilestoneProgress(deletedTask.milestone_id)
+      }
       fetchData()
     } catch (error: any) {
       toast({
@@ -420,6 +425,31 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
     } else {
       const member = teamMembers.find(m => m.user_id === ownerId)
       return member?.name || 'Unknown'
+    }
+  }
+
+  // Calculate milestone progress based on task progress
+  const calculateMilestoneProgress = (milestoneId: string) => {
+    const milestoneTasks = tasks.filter(task => task.milestone_id === milestoneId)
+    if (milestoneTasks.length === 0) return 0
+    
+    const totalProgress = milestoneTasks.reduce((sum, task) => sum + (task.progress || 0), 0)
+    return Math.round(totalProgress / milestoneTasks.length)
+  }
+
+  // Update milestone progress in database after task changes
+  const updateMilestoneProgress = async (milestoneId: string) => {
+    const calculatedProgress = calculateMilestoneProgress(milestoneId)
+    
+    try {
+      const { error } = await supabase
+        .from('project_milestones')
+        .update({ progress: calculatedProgress, updated_by: user?.id })
+        .eq('id', milestoneId)
+
+      if (error) throw error
+    } catch (error) {
+      console.error('Error updating milestone progress:', error)
     }
   }
 
@@ -479,19 +509,8 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="milestone_progress">Progress (%)</Label>
-                    <Input
-                      id="milestone_progress"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={milestoneForm.progress}
-                      onChange={(e) => setMilestoneForm({...milestoneForm, progress: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-                  <div className="space-y-2">
+                 <div className="grid grid-cols-1 gap-4">
+                   <div className="space-y-2">
                     <Label>Due Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -546,6 +565,7 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
         {milestones.length > 0 ? (
           milestones.map((milestone) => {
             const milestoneTasks = tasks.filter(task => task.milestone_id === milestone.id)
+            const calculatedProgress = calculateMilestoneProgress(milestone.id)
             
             return (
               <Card key={milestone.id}>
@@ -560,12 +580,24 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
                             {milestone.status.replace('_', ' ')}
                           </Badge>
                         </CardTitle>
-                        <CardDescription>
-                          {milestone.description}
-                          {milestone.due_date && (
-                            <span className="ml-2">• Due: {format(new Date(milestone.due_date), 'MMM dd, yyyy')}</span>
-                          )}
-                        </CardDescription>
+                         <CardDescription>
+                           {milestone.description}
+                           {milestone.due_date && (
+                             <span className="ml-2">• Due: {format(new Date(milestone.due_date), 'MMM dd, yyyy')}</span>
+                           )}
+                           <div className="flex items-center gap-2 mt-2">
+                             <span className="text-sm font-medium">Progress: {calculatedProgress}%</span>
+                             <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
+                               <div 
+                                 className="bg-primary h-2 rounded-full transition-all duration-300" 
+                                 style={{ width: `${calculatedProgress}%` }}
+                               ></div>
+                             </div>
+                             {milestoneTasks.length === 0 && (
+                               <span className="text-xs text-muted-foreground">(No tasks)</span>
+                             )}
+                           </div>
+                         </CardDescription>
                       </div>
                     </div>
                     
