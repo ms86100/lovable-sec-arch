@@ -181,7 +181,7 @@ All colors MUST be HSL.
   }
   
   .kpi-card {
-    @apply bg-gradient-to-br from-card to-accent/50 border border-border rounded-lg p-6 hover:shadow-[var(--shadow-elegant)] transition-all duration-300 group;
+    @apply bg-gradient-to-br from-card to-accent/50 border border-border rounded-lg p-6 hover:shadow-[var(--shadow-elegant)] transition-all duration-300;
   }
   
   .timeline-item {
