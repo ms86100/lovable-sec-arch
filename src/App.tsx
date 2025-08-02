@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";
 import Dashboard from "./pages/Dashboard";
+import Templates from "./pages/Templates";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
@@ -40,6 +41,16 @@ const App = () => (
                 <Layout>
                   <ProtectedRoute>
                     <Projects />
+                  </ProtectedRoute>
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/templates" 
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <Templates />
                   </ProtectedRoute>
                 </Layout>
               } 
