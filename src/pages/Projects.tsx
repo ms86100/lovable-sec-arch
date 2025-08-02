@@ -20,6 +20,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Project {
   id: string;
@@ -48,13 +49,40 @@ const Projects = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (user) {
+      fetchProjects();
+    } else {
+      console.log('No user found, not fetching projects');
+      setLoading(false);
+    }
+  }, [user]);
 
   const fetchProjects = async () => {
     try {
+      console.log('Starting to fetch projects...');
+      console.log('Current user:', user);
+      console.log('Auth state:', await supabase.auth.getUser());
+      
+      // Try simple query first
+      const { data: simpleData, error: simpleError } = await supabase
+        .from('projects')
+        .select('*')
+        .limit(5);
+      
+      console.log('Simple query result:', { simpleData, simpleError });
+      
+      if (simpleError) {
+        toast({
+          title: "Error",
+          description: `Database access error: ${simpleError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('projects')
         .select(`
@@ -69,19 +97,22 @@ const Projects = () => {
         `)
         .order('created_at', { ascending: false });
 
+      console.log('Query result:', { data, error });
+
       if (error) {
         console.error('Error fetching projects:', error);
         toast({
           title: "Error",
-          description: "Failed to load projects",
+          description: `Failed to load projects: ${error.message}`,
           variant: "destructive",
         });
         return;
       }
 
+      console.log('Projects data:', data);
       setProjects(data || []);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Catch block error:', error);
       toast({
         title: "Error",
         description: "Failed to load projects",
