@@ -173,6 +173,204 @@ export type Database = {
           },
         ]
       }
+      project_risks: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          impact: string
+          mitigation_strategy: string | null
+          probability: string
+          project_id: string
+          resolution_date: string | null
+          resolution_notes: string | null
+          risk_owner: string | null
+          risk_score: number | null
+          severity_level: string
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          impact?: string
+          mitigation_strategy?: string | null
+          probability?: string
+          project_id: string
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          risk_owner?: string | null
+          risk_score?: number | null
+          severity_level?: string
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          impact?: string
+          mitigation_strategy?: string | null
+          probability?: string
+          project_id?: string
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          risk_owner?: string | null
+          risk_score?: number | null
+          severity_level?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_risks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_servers: {
+        Row: {
+          assessment_type: string | null
+          configuration_details: Json | null
+          created_at: string
+          created_by: string | null
+          environment: string
+          export_control_status: string | null
+          id: string
+          last_assessment_date: string | null
+          notes: string | null
+          ownership_type: string | null
+          project_id: string
+          server_name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assessment_type?: string | null
+          configuration_details?: Json | null
+          created_at?: string
+          created_by?: string | null
+          environment: string
+          export_control_status?: string | null
+          id?: string
+          last_assessment_date?: string | null
+          notes?: string | null
+          ownership_type?: string | null
+          project_id: string
+          server_name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assessment_type?: string | null
+          configuration_details?: Json | null
+          created_at?: string
+          created_by?: string | null
+          environment?: string
+          export_control_status?: string | null
+          id?: string
+          last_assessment_date?: string | null
+          notes?: string | null
+          ownership_type?: string | null
+          project_id?: string
+          server_name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_servers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_stakeholders: {
+        Row: {
+          contact_info: Json | null
+          created_at: string
+          created_by: string | null
+          department: string | null
+          email: string | null
+          id: string
+          influence_level: string
+          is_internal: boolean | null
+          name: string
+          notes: string | null
+          project_id: string
+          raci_role: string | null
+          role: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          contact_info?: Json | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string | null
+          id?: string
+          influence_level?: string
+          is_internal?: boolean | null
+          name: string
+          notes?: string | null
+          project_id: string
+          raci_role?: string | null
+          role: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          contact_info?: Json | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string | null
+          id?: string
+          influence_level?: string
+          is_internal?: boolean | null
+          name?: string
+          notes?: string | null
+          project_id?: string
+          raci_role?: string | null
+          role?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stakeholders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_templates: {
         Row: {
           created_at: string
