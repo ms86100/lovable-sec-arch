@@ -8,8 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CompactCard } from '@/components/dashboard/CompactCard'
-import { DashboardControls } from '@/components/dashboard/DashboardControls'
+
 import { 
   Package, 
   FolderOpen, 
@@ -149,10 +148,7 @@ export default function Dashboard() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all')
   const [availableProjects, setAvailableProjects] = useState<Project[]>([])
 
-  // Dashboard UI states
-  const [viewMode, setViewMode] = useState<'compact' | 'expanded'>('compact')
-  const [layoutMode, setLayoutMode] = useState<'grid' | 'masonry' | 'list'>('grid')
-  const [showGlobalData, setShowGlobalData] = useState(true)
+  // Simplified UI states - removed legacy controls
   const [pinnedCards, setPinnedCards] = useState<Set<string>>(new Set())
 
   const canCreateProducts = hasRole('manager') || hasRole('admin')
@@ -160,7 +156,6 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboardData()
     fetchProducts()
-    loadDashboardPreferences()
   }, [])
 
   useEffect(() => {
@@ -431,25 +426,6 @@ export default function Dashboard() {
     }
   }
 
-  const loadDashboardPreferences = () => {
-    try {
-      const saved = localStorage.getItem('dashboardPreferences')
-      if (saved) {
-        const preferences = JSON.parse(saved)
-        setViewMode(preferences.viewMode || 'compact')
-        setLayoutMode(preferences.layoutMode || 'grid')
-        setShowGlobalData(preferences.showGlobalData !== false)
-        if (preferences.selectedProductId && preferences.selectedProductId !== 'all') {
-          setSelectedProductId(preferences.selectedProductId)
-        }
-        if (preferences.selectedProjectId && preferences.selectedProjectId !== 'all') {
-          setSelectedProjectId(preferences.selectedProjectId)
-        }
-      }
-    } catch (error) {
-      console.error('Error loading dashboard preferences:', error)
-    }
-  }
 
   const togglePinCard = (cardId: string) => {
     setPinnedCards(prev => {
@@ -558,140 +534,265 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Dashboard Controls */}
-      <DashboardControls
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        layoutMode={layoutMode}
-        onLayoutModeChange={setLayoutMode}
-        showGlobalData={showGlobalData}
-        onShowGlobalDataChange={setShowGlobalData}
-        selectedProductId={selectedProductId}
-        onProductChange={setSelectedProductId}
-        selectedProjectId={selectedProjectId}
-        onProjectChange={setSelectedProjectId}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        products={products}
-        projects={availableProjects}
-      />
+      {/* Simplified Filter Controls */}
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Filter Projects</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Search</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search projects..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
-      {/* Compact Dashboard Cards */}
-      <div className={`
-        grid gap-4 
-        ${layoutMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : ''}
-        ${layoutMode === 'masonry' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : ''}
-        ${layoutMode === 'list' ? 'grid-cols-1' : ''}
-      `}>
-        {/* Health Summary Cards */}
-        <CompactCard
-          title="🟢 Healthy Projects"
-          value={stats.healthyProjects}
-          description="Projects that are on track with no major issues"
-          icon={<CheckCircle className="w-4 h-4 text-green-600" />}
-          variant="success"
-          isPinned={pinnedCards.has('healthy')}
-          onPin={() => togglePinCard('healthy')}
-          isGlobal={selectedProjectId === 'all'}
-        />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Product Filter</label>
+              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Products" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Products</SelectItem>
+                  {products.map((product) => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <CompactCard
-          title="🟠 At Risk Projects"
-          value={stats.atRiskProjects}
-          description="Projects that are delayed or behind schedule"
-          icon={<AlertTriangle className="w-4 h-4 text-amber-600" />}
-          variant="warning"
-          isPinned={pinnedCards.has('atRisk')}
-          onPin={() => togglePinCard('atRisk')}
-          isGlobal={selectedProjectId === 'all'}
-        />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Project Filter</label>
+              <Select 
+                value={selectedProjectId} 
+                onValueChange={setSelectedProjectId}
+                disabled={selectedProductId === 'all'}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Projects" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {availableProjects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-        <CompactCard
-          title="🔴 Critical Projects"
-          value={stats.criticalProjects}
-          description="Projects with critical issues requiring immediate attention"
-          icon={<AlertCircle className="w-4 h-4 text-red-600" />}
-          variant="destructive"
-          isPinned={pinnedCards.has('critical')}
-          onPin={() => togglePinCard('critical')}
-          isGlobal={selectedProjectId === 'all'}
-        />
+          {/* Active Filters Display */}
+          {(selectedProductId !== 'all' || selectedProjectId !== 'all') && (
+            <div className="flex items-center gap-2 mt-4 p-3 bg-muted/30 rounded-lg">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Active Filters:</span>
+              {selectedProductId !== 'all' && (
+                <Badge variant="secondary">
+                  Product: {products.find(p => p.id === selectedProductId)?.name || 'Unknown'}
+                </Badge>
+              )}
+              {selectedProjectId !== 'all' && (
+                <Badge variant="secondary">
+                  Project: {availableProjects.find(p => p.id === selectedProjectId)?.name || 'Unknown'}
+                </Badge>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* KPI Cards */}
-        {showGlobalData && (
-          <CompactCard
-            title="Products"
-            value={stats.totalProducts}
-            description="Total number of products in portfolio"
-            icon={<Package className="w-4 h-4 text-primary" />}
-            isGlobal={true}
-            isPinned={pinnedCards.has('products')}
-            onPin={() => togglePinCard('products')}
-          />
-        )}
+      {/* Project Health Summary - Airbus Style */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="w-6 h-6 text-airbus-blue" />
+          <h2 className="text-2xl font-bold text-airbus-blue">Project Health Overview</h2>
+          {selectedProjectId !== 'all' && (
+            <Badge variant="outline" className="ml-2">
+              Filtered View: {availableProjects.find(p => p.id === selectedProjectId)?.name}
+            </Badge>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Healthy Projects Card */}
+          <Card className="airbus-card border-green-200 bg-green-50/30 hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-800">Healthy Projects</h3>
+                    <p className="text-sm text-green-600">On track with no major issues</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-green-600">{stats.healthyProjects}</div>
+                  {stats.totalProjects > 0 && (
+                    <div className="text-sm text-green-500">
+                      {Math.round((stats.healthyProjects / stats.totalProjects) * 100)}%
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <CompactCard
-          title="Total Projects"
-          value={stats.totalProjects}
-          description={selectedProjectId !== 'all' ? 'Selected project data' : 'All projects across products'}
-          icon={<FolderOpen className="w-4 h-4 text-primary" />}
-          isPinned={pinnedCards.has('projects')}
-          onPin={() => togglePinCard('projects')}
-          isGlobal={selectedProjectId === 'all'}
-        />
+          {/* At Risk Projects Card */}
+          <Card className="airbus-card border-amber-200 bg-amber-50/30 hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-800">At Risk Projects</h3>
+                    <p className="text-sm text-amber-600">Delayed or behind schedule</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-amber-600">{stats.atRiskProjects}</div>
+                  {stats.totalProjects > 0 && (
+                    <div className="text-sm text-amber-500">
+                      {Math.round((stats.atRiskProjects / stats.totalProjects) * 100)}%
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <CompactCard
-          title="Average Progress"
-          value={`${stats.avgProgress}%`}
-          description="Average progress based on task completion"
-          icon={<Target className="w-4 h-4 text-primary" />}
-          isPinned={pinnedCards.has('progress')}
-          onPin={() => togglePinCard('progress')}
-          isGlobal={selectedProjectId === 'all'}
-        >
-          <Progress value={stats.avgProgress} className="mt-2" />
-        </CompactCard>
+          {/* Critical Projects Card */}
+          <Card className="airbus-card border-red-200 bg-red-50/30 hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-red-800">Critical Projects</h3>
+                    <p className="text-sm text-red-600">Requiring immediate attention</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-red-600">{stats.criticalProjects}</div>
+                  {stats.totalProjects > 0 && (
+                    <div className="text-sm text-red-500">
+                      {Math.round((stats.criticalProjects / stats.totalProjects) * 100)}%
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
-        <CompactCard
-          title="💰 Total Budget"
-          value={`$${stats.totalBudget.toLocaleString()}`}
-          description="Total planned budget amount"
-          icon={<DollarSign className="w-4 h-4 text-green-600" />}
-          variant="success"
-          isPinned={pinnedCards.has('budget')}
-          onPin={() => togglePinCard('budget')}
-          isGlobal={selectedProjectId === 'all'}
-        />
+      {/* Key Performance Indicators */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Target className="w-6 h-6 text-airbus-blue" />
+          <h2 className="text-2xl font-bold text-airbus-blue">Key Performance Indicators</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <CompactCard
-          title="💸 Total Spent"
-          value={`$${stats.totalSpent.toLocaleString()}`}
-          description="Total actual spent amount"
-          icon={<DollarSign className="w-4 h-4 text-blue-600" />}
-          isPinned={pinnedCards.has('spent')}
-          onPin={() => togglePinCard('spent')}
-          isGlobal={selectedProjectId === 'all'}
-        />
+          {/* Average Progress */}
+          <Card className="airbus-card hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Target className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Average Progress</h3>
+                    <p className="text-sm text-muted-foreground">Based on task completion</p>
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-blue-600">{stats.avgProgress}%</div>
+              </div>
+              <Progress value={stats.avgProgress} className="h-2" />
+            </CardContent>
+          </Card>
 
-        <CompactCard
-          title="Overdue Tasks"
-          value={stats.overdueTasks}
-          description="Tasks that are past their due date"
-          icon={<Clock className="w-4 h-4 text-red-600" />}
-          variant="destructive"
-          isPinned={pinnedCards.has('overdue')}
-          onPin={() => togglePinCard('overdue')}
-          isGlobal={selectedProjectId === 'all'}
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowOverdueList(!showOverdueList)}
-            className="mt-2 w-full"
-          >
-            {showOverdueList ? 'Hide' : 'View'} Details
-          </Button>
-        </CompactCard>
+          {/* Total Budget */}
+          <Card className="airbus-card hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Total Budget</h3>
+                    <p className="text-sm text-muted-foreground">Planned amount</p>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-green-600">${stats.totalBudget.toLocaleString()}</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Spent */}
+          <Card className="airbus-card hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Total Spent</h3>
+                    <p className="text-sm text-muted-foreground">Actual amount</p>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-blue-600">${stats.totalSpent.toLocaleString()}</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Overdue Tasks */}
+          <Card className="airbus-card hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Overdue Tasks</h3>
+                    <p className="text-sm text-muted-foreground">Past due date</p>
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-red-600">{stats.overdueTasks}</div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowOverdueList(!showOverdueList)}
+                className="w-full"
+              >
+                {showOverdueList ? 'Hide' : 'View'} Details
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Overdue Tasks List */}
