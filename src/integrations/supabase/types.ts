@@ -781,13 +781,16 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          dependencies: Json | null
           description: string | null
           due_date: string | null
           id: string
           milestone_id: string
           owner_id: string | null
           owner_type: string
+          points: number | null
           priority: string
+          progress: number | null
           status: string
           title: string
           updated_at: string
@@ -796,13 +799,16 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          dependencies?: Json | null
           description?: string | null
           due_date?: string | null
           id?: string
           milestone_id: string
           owner_id?: string | null
           owner_type?: string
+          points?: number | null
           priority?: string
+          progress?: number | null
           status?: string
           title: string
           updated_at?: string
@@ -811,13 +817,16 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          dependencies?: Json | null
           description?: string | null
           due_date?: string | null
           id?: string
           milestone_id?: string
           owner_id?: string | null
           owner_type?: string
+          points?: number | null
           priority?: string
+          progress?: number | null
           status?: string
           title?: string
           updated_at?: string

@@ -37,6 +37,9 @@ interface Task {
   owner_type: string
   due_date?: string
   created_at: string
+  progress: number
+  points: number
+  dependencies: string[]
 }
 
 interface Stakeholder {
@@ -86,7 +89,10 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
     priority: 'medium',
     owner_id: '',
     owner_type: 'stakeholder',
-    due_date: undefined as Date | undefined
+    due_date: undefined as Date | undefined,
+    progress: 0,
+    points: 1,
+    dependencies: [] as string[]
   })
 
   useEffect(() => {
@@ -132,7 +138,10 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
       if (teamError) throw teamError
 
       setMilestones(milestonesData || [])
-      setTasks(tasksData || [])
+      setTasks((tasksData || []).map(task => ({
+        ...task,
+        dependencies: Array.isArray(task.dependencies) ? task.dependencies.map(dep => String(dep)) : []
+      })))
       setStakeholders(stakeholdersData || [])
       setTeamMembers(teamData?.map(member => ({
         user_id: member.id,
@@ -169,7 +178,10 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
       priority: 'medium',
       owner_id: '',
       owner_type: 'stakeholder',
-      due_date: undefined
+      due_date: undefined,
+      progress: 0,
+      points: 1,
+      dependencies: []
     })
     setEditingTask(null)
     setSelectedMilestone('')
@@ -230,6 +242,23 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
   const handleTaskSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Validate task due date against milestone due date
+    if (taskForm.due_date && selectedMilestone) {
+      const milestone = milestones.find(m => m.id === selectedMilestone)
+      if (milestone && milestone.due_date) {
+        const taskDueDate = taskForm.due_date
+        const milestoneDueDate = new Date(milestone.due_date)
+        if (taskDueDate > milestoneDueDate) {
+          toast({
+            title: "Validation Error",
+            description: "Task due date cannot be later than the milestone date.",
+            variant: "destructive"
+          })
+          return
+        }
+      }
+    }
+    
     try {
       const taskData = {
         milestone_id: selectedMilestone,
@@ -240,6 +269,9 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
         owner_id: taskForm.owner_id || null,
         owner_type: taskForm.owner_type,
         due_date: taskForm.due_date ? format(taskForm.due_date, 'yyyy-MM-dd') : null,
+        progress: taskForm.progress,
+        points: taskForm.points,
+        dependencies: taskForm.dependencies,
         created_by: user?.id,
         updated_by: user?.id
       }
@@ -303,7 +335,10 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
       priority: task.priority,
       owner_id: task.owner_id || '',
       owner_type: task.owner_type,
-      due_date: task.due_date ? new Date(task.due_date) : undefined
+      due_date: task.due_date ? new Date(task.due_date) : undefined,
+      progress: task.progress || 0,
+      points: task.points || 1,
+      dependencies: task.dependencies || []
     })
     setTaskDialogOpen(true)
   }
@@ -635,6 +670,77 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
                                 </div>
                               </div>
 
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="task_progress">Progress (%)</Label>
+                                  <Input
+                                    id="task_progress"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={taskForm.progress}
+                                    onChange={(e) => setTaskForm({...taskForm, progress: parseInt(e.target.value) || 0})}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="task_points">Points (1 point = 1 day)</Label>
+                                  <Input
+                                    id="task_points"
+                                    type="number"
+                                    min="1"
+                                    value={taskForm.points}
+                                    onChange={(e) => setTaskForm({...taskForm, points: parseInt(e.target.value) || 1})}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label htmlFor="task_dependencies">Dependencies</Label>
+                                <Select value="" onValueChange={(value) => {
+                                  if (value && !taskForm.dependencies.includes(value)) {
+                                    setTaskForm({...taskForm, dependencies: [...taskForm.dependencies, value]})
+                                  }
+                                }}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select task dependencies" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {tasks
+                                      .filter(t => t.id !== editingTask?.id && 
+                                        tasks.some(task => task.milestone_id === selectedMilestone && 
+                                          tasks.some(projectTask => projectTask.milestone_id === t.milestone_id)))
+                                      .map((task) => (
+                                        <SelectItem key={task.id} value={task.id}>
+                                          {task.title}
+                                        </SelectItem>
+                                      ))
+                                    }
+                                  </SelectContent>
+                                </Select>
+                                {taskForm.dependencies.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    {taskForm.dependencies.map((depId) => {
+                                      const depTask = tasks.find(t => t.id === depId)
+                                      return depTask ? (
+                                        <Badge key={depId} variant="secondary" className="flex items-center gap-1">
+                                          {depTask.title}
+                                          <button
+                                            type="button"
+                                            className="ml-1 text-xs"
+                                            onClick={() => setTaskForm({
+                                              ...taskForm, 
+                                              dependencies: taskForm.dependencies.filter(id => id !== depId)
+                                            })}
+                                          >
+                                            ×
+                                          </button>
+                                        </Badge>
+                                      ) : null
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+
                               <div className="space-y-2">
                                 <Label>Due Date</Label>
                                 <Popover>
@@ -716,10 +822,12 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
                                 {task.owner_id && (
                                   <span>Owner: {getOwnerName(task.owner_id, task.owner_type)}</span>
                                 )}
-                                {task.due_date && (
-                                  <span>Due: {format(new Date(task.due_date), 'MMM dd, yyyy')}</span>
-                                )}
-                              </div>
+                                 {task.due_date && (
+                                   <span>Due: {format(new Date(task.due_date), 'MMM dd, yyyy')}</span>
+                                 )}
+                                 <span>Progress: {task.progress || 0}%</span>
+                                 <span>Points: {task.points || 1}</span>
+                               </div>
                               {task.description && (
                                 <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
                               )}
