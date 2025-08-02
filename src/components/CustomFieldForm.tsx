@@ -72,9 +72,9 @@ export function CustomFieldForm({ field, onSuccess, onCancel }: CustomFieldFormP
         field_type: formData.field_type,
         is_required: formData.is_required,
         default_value: formData.default_value.trim() || null,
-        dropdown_options: formData.field_type === 'dropdown' ? formData.dropdown_options : null,
+        dropdown_options: formData.field_type === 'dropdown' && formData.dropdown_options.length > 0 ? formData.dropdown_options : null,
         help_text: formData.help_text.trim() || null,
-        updated_by: user.id
+        updated_by: user?.id || null
       }
 
       let error
@@ -89,7 +89,7 @@ export function CustomFieldForm({ field, onSuccess, onCancel }: CustomFieldFormP
           .from('custom_fields')
           .insert({
             ...fieldData,
-            created_by: user.id
+            created_by: user?.id || null
           })
         error = insertError
       }

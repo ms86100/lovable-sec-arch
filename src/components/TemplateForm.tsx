@@ -42,7 +42,7 @@ export function TemplateForm({ template, onSuccess, onCancel }: TemplateFormProp
         name: formData.name.trim(),
         description: formData.description.trim() || null,
         is_public: formData.is_public,
-        updated_by: user.id
+        updated_by: user?.id || null
       }
 
       let error
@@ -57,7 +57,7 @@ export function TemplateForm({ template, onSuccess, onCancel }: TemplateFormProp
           .from('project_templates')
           .insert({
             ...templateData,
-            created_by: user.id
+            created_by: user?.id || null
           })
         error = insertError
       }
