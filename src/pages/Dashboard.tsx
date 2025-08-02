@@ -28,11 +28,14 @@ import {
   BarChart3,
   Zap,
   Shield,
-  BarChart,
+  BarChart as BarChartIcon,
   Eye,
   MessageSquare,
-  Folder
+  Folder,
+  DollarSign,
+  AlertCircle
 } from 'lucide-react'
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts'
 import { useNavigate } from 'react-router-dom'
 import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
 import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
@@ -59,6 +62,15 @@ interface DashboardStats {
   projectsThisWeek: number
   templatesUsed: number
   avgProgress: number
+  // Project Health
+  healthyProjects: number
+  atRiskProjects: number
+  criticalProjects: number
+  // Budget
+  totalBudget: number
+  totalSpent: number
+  // Tasks
+  overdueTasks: number
 }
 
 interface Project {
@@ -91,6 +103,15 @@ interface Product {
   name: string
 }
 
+interface OverdueTask {
+  id: string
+  title: string
+  due_date: string
+  project_name: string
+  milestone_title: string
+  owner_name?: string
+}
+
 export default function Dashboard() {
   const { user, userRole, hasRole } = useAuth()
   const navigate = useNavigate()
@@ -103,11 +124,19 @@ export default function Dashboard() {
     onHoldProjects: 0,
     projectsThisWeek: 0,
     templatesUsed: 0,
-    avgProgress: 0
+    avgProgress: 0,
+    healthyProjects: 0,
+    atRiskProjects: 0,
+    criticalProjects: 0,
+    totalBudget: 0,
+    totalSpent: 0,
+    overdueTasks: 0
   })
   const [recentProjects, setRecentProjects] = useState<Project[]>([])
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
+  const [overdueTasks, setOverdueTasks] = useState<OverdueTask[]>([])
+  const [showOverdueList, setShowOverdueList] = useState(false)
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterPriority, setFilterPriority] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
@@ -155,7 +184,7 @@ export default function Dashboard() {
           products!inner (name)
         `, { count: 'exact' })
 
-      // Calculate stats
+      // Calculate basic stats
       const activeProjects = projects?.filter(p => p.status === 'active').length || 0
       const completedProjects = projects?.filter(p => p.status === 'completed').length || 0
       const planningProjects = projects?.filter(p => p.status === 'planning').length || 0
@@ -167,9 +196,81 @@ export default function Dashboard() {
         new Date(p.created_at) >= weekStart
       ).length || 0
 
-      // Average progress
-      const avgProgress = projects?.length ? 
-        Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0
+      // Calculate Project Health (Red, Amber, Green)
+      const today = new Date()
+      let healthyProjects = 0
+      let atRiskProjects = 0
+      let criticalProjects = 0
+
+      projects?.forEach(project => {
+        const progress = project.progress || 0
+        const endDate = project.end_date ? new Date(project.end_date) : null
+        const daysUntilDeadline = endDate ? Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null
+        
+        // Critical (Red): Overdue projects or no progress with approaching deadline
+        if ((endDate && daysUntilDeadline < 0) || 
+            (progress === 0 && daysUntilDeadline !== null && daysUntilDeadline <= 7) ||
+            project.status === 'on_hold') {
+          criticalProjects++
+        }
+        // At Risk (Amber): Behind schedule or minimal progress
+        else if ((progress < 50 && daysUntilDeadline !== null && daysUntilDeadline <= 30) ||
+                 (progress < 25 && project.status === 'active')) {
+          atRiskProjects++
+        }
+        // Healthy (Green): On track
+        else {
+          healthyProjects++
+        }
+      })
+
+      // Calculate milestone-based average progress
+      const { data: tasks } = await supabase
+        .from('project_tasks')
+        .select('progress')
+
+      let avgProgress = 0
+      if (tasks && tasks.length > 0) {
+        const totalProgress = tasks.reduce((sum, task) => sum + (task.progress || 0), 0)
+        avgProgress = Math.round(totalProgress / tasks.length)
+      }
+
+      // Fetch budget data
+      const { data: budgetItems } = await supabase
+        .from('project_budget_items')
+        .select('planned_amount, actual_amount')
+
+      const totalBudget = budgetItems?.reduce((sum, item) => sum + (item.planned_amount || 0), 0) || 0
+      const totalSpent = budgetItems?.reduce((sum, item) => sum + (item.actual_amount || 0), 0) || 0
+
+      // Fetch overdue tasks with milestone and project info
+      const { data: overdueTasksData } = await supabase
+        .from('project_tasks')
+        .select(`
+          id,
+          title,
+          due_date,
+          milestone_id
+        `)
+        .lt('due_date', today.toISOString().split('T')[0])
+        .neq('status', 'completed')
+
+      // Get milestone and project info for overdue tasks (simplified)
+      const formattedOverdueTasks: OverdueTask[] = []
+      if (overdueTasksData && overdueTasksData.length > 0) {
+        // For now, create simplified entries
+        overdueTasksData.forEach(task => {
+          formattedOverdueTasks.push({
+            id: task.id,
+            title: task.title,
+            due_date: task.due_date,
+            project_name: 'Project TBD', // Will be enhanced later
+            milestone_title: 'Milestone TBD' // Will be enhanced later
+          })
+        })
+      }
+
+      setOverdueTasks(formattedOverdueTasks)
 
       // Count templates usage
       const { count: templatesUsed } = await supabase
@@ -186,7 +287,13 @@ export default function Dashboard() {
         onHoldProjects,
         projectsThisWeek,
         templatesUsed: templatesUsed || 0,
-        avgProgress
+        avgProgress,
+        healthyProjects,
+        atRiskProjects,
+        criticalProjects,
+        totalBudget,
+        totalSpent,
+        overdueTasks: formattedOverdueTasks.length
       })
 
       // Get recent projects with more details
@@ -478,7 +585,49 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Enhanced KPI Cards with Airbus Design */}
+      {/* Project Health Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card className="kpi-card group animate-scale-in border-green-200 dark:border-green-800">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">🟢 Healthy Projects</p>
+                <p className="text-3xl font-bold text-green-600">{stats.healthyProjects}</p>
+                <p className="text-xs text-muted-foreground mt-1">On track</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-600 group-hover:animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="kpi-card group animate-scale-in border-amber-200 dark:border-amber-800" style={{ animationDelay: '0.1s' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">🟠 At Risk Projects</p>
+                <p className="text-3xl font-bold text-amber-600">{stats.atRiskProjects}</p>
+                <p className="text-xs text-muted-foreground mt-1">Delayed</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-amber-600 group-hover:animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="kpi-card group animate-scale-in border-red-200 dark:border-red-800" style={{ animationDelay: '0.2s' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">🔴 Critical Projects</p>
+                <p className="text-3xl font-bold text-red-600">{stats.criticalProjects}</p>
+                <p className="text-xs text-muted-foreground mt-1">Critical issues</p>
+              </div>
+              <AlertCircle className="h-8 w-8 text-red-600 group-hover:animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Enhanced KPI Cards with Budget and Tasks */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-slide-up">
         <Card className="kpi-card group animate-scale-in">
           <CardContent className="p-4">
@@ -510,11 +659,11 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Active</p>
-                <p className="text-3xl font-bold text-success">{stats.activeProjects}</p>
-                <p className="text-xs text-muted-foreground mt-1">In progress</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg Progress</p>
+                <p className="text-3xl font-bold text-primary">{stats.avgProgress}%</p>
+                <p className="text-xs text-muted-foreground mt-1">Based on tasks</p>
               </div>
-              <Activity className="h-8 w-8 text-success group-hover:animate-pulse" />
+              <Target className="h-8 w-8 text-primary group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
@@ -523,11 +672,11 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">This Week</p>
-                <p className="text-3xl font-bold text-info">{stats.projectsThisWeek}</p>
-                <p className="text-xs text-muted-foreground mt-1">New projects</p>
+                <p className="text-sm font-medium text-muted-foreground">💰 Total Budget</p>
+                <p className="text-3xl font-bold text-green-600">${stats.totalBudget.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mt-1">Planned amount</p>
               </div>
-              <Calendar className="h-8 w-8 text-info group-hover:animate-pulse" />
+              <DollarSign className="h-8 w-8 text-green-600 group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
@@ -536,28 +685,68 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Progress</p>
-                <p className="text-3xl font-bold text-primary">{stats.avgProgress}%</p>
-                <p className="text-xs text-muted-foreground mt-1">Overall completion</p>
+                <p className="text-sm font-medium text-muted-foreground">💸 Total Spent</p>
+                <p className="text-3xl font-bold text-blue-600">${stats.totalSpent.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mt-1">Actual amount</p>
               </div>
-              <Target className="h-8 w-8 text-primary group-hover:animate-pulse" />
+              <DollarSign className="h-8 w-8 text-blue-600 group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.5s' }}>
+        <Card 
+          className="kpi-card group animate-scale-in cursor-pointer hover:shadow-lg transition-shadow" 
+          style={{ animationDelay: '0.5s' }}
+          onClick={() => setShowOverdueList(!showOverdueList)}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Templates</p>
-                <p className="text-3xl font-bold text-warning">{stats.templatesUsed}</p>
-                <p className="text-xs text-muted-foreground mt-1">Using templates</p>
+                <p className="text-sm font-medium text-muted-foreground">Overdue Tasks</p>
+                <p className="text-3xl font-bold text-red-600">{stats.overdueTasks}</p>
+                <p className="text-xs text-muted-foreground mt-1">Click to view</p>
               </div>
-              <FileText className="h-8 w-8 text-warning group-hover:animate-pulse" />
+              <Clock className="h-8 w-8 text-red-600 group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Overdue Tasks List */}
+      {showOverdueList && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-red-600" />
+              Overdue Tasks
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {overdueTasks.length > 0 ? (
+              <div className="space-y-2">
+                {overdueTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{task.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {task.project_name} • {task.milestone_title}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="destructive">Due: {format(new Date(task.due_date), 'MMM dd, yyyy')}</Badge>
+                      {task.owner_name && (
+                        <p className="text-sm text-muted-foreground mt-1">{task.owner_name}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No overdue tasks found.</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Status Overview Cards with Airbus styling */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-slide-up">
@@ -618,7 +807,7 @@ export default function Dashboard() {
             Overview
           </TabsTrigger>
           <TabsTrigger value="timeline" className="flex items-center gap-2">
-            <BarChart className="w-4 h-4" />
+            <BarChartIcon className="w-4 h-4" />
             Timeline
           </TabsTrigger>
           <TabsTrigger value="risks" className="flex items-center gap-2">
@@ -664,6 +853,88 @@ export default function Dashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+            {/* Project Health Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Project Health Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Healthy', value: stats.healthyProjects, color: '#10B981' },
+                        { name: 'At Risk', value: stats.atRiskProjects, color: '#F59E0B' },
+                        { name: 'Critical', value: stats.criticalProjects, color: '#EF4444' }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      dataKey="value"
+                    >
+                      {[
+                        { name: 'Healthy', value: stats.healthyProjects, color: '#10B981' },
+                        { name: 'At Risk', value: stats.atRiskProjects, color: '#F59E0B' },
+                        { name: 'Critical', value: stats.criticalProjects, color: '#EF4444' }
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Budget vs Spent Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Budget Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={[
+                    { name: 'Budget vs Spent', budget: stats.totalBudget, spent: stats.totalSpent }
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Bar dataKey="budget" fill="#10B981" name="Total Budget" />
+                    <Bar dataKey="spent" fill="#3B82F6" name="Total Spent" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Project Status Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Project Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={[
+                    { name: 'Active', count: stats.activeProjects },
+                    { name: 'Planning', count: stats.planningProjects },
+                    { name: 'Completed', count: stats.completedProjects },
+                    { name: 'On Hold', count: stats.onHoldProjects }
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#6366F1" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
             {/* Recent Projects - Enhanced */}
