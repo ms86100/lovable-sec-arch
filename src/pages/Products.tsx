@@ -194,7 +194,12 @@ export default function Products() {
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map((product) => (
-          <Card key={product.id} className="hover:shadow-lg transition-shadow">
+          <Card 
+            key={product.id} 
+            className="hover:shadow-lg hover:border-primary/50 transition-all duration-200 cursor-pointer group"
+            onClick={() => navigate(`/projects?product=${product.id}`)}
+            title={`Click to view all projects for ${product.name}`}
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -216,7 +221,10 @@ export default function Products() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setSelectedProduct(product)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProduct(product);
+                          }}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -238,7 +246,12 @@ export default function Products() {
                   {canDeleteProduct(product) && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </AlertDialogTrigger>
