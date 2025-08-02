@@ -42,12 +42,7 @@ import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
 import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
 import RiskDashboard from '@/components/risks/RiskDashboard'
 import RACIMatrix from '@/components/raci/RACIMatrix'
-import PerformanceDashboard from '@/components/performance/PerformanceDashboard'
-import ResourceManager from '@/components/resources/ResourceManager'
 import { BudgetTracker } from '@/components/budget/BudgetTracker'
-import AdvancedAnalytics from '@/components/analytics/AdvancedAnalytics'
-import CommunicationHub from '@/components/communication/CommunicationHub'
-import DocumentRepository from '@/components/documents/DocumentRepository'
 import SecurityCenter from '@/components/security/SecurityCenter'
 import { ProjectMilestones } from '@/components/milestones/ProjectMilestones'
 import { ProjectBudget } from '@/components/budget/ProjectBudget'
@@ -1273,15 +1268,67 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="raci" className="space-y-6">
-          <RACIMatrix />
+          {selectedProjectId && selectedProjectId !== 'all' ? (
+            <RACIMatrix projectId={selectedProjectId} />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  RACI Matrix
+                </CardTitle>
+                <CardDescription>
+                  Select a project to view its RACI assignments
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
-          <PerformanceDashboard timeframe="month" />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Performance Analytics
+              </CardTitle>
+              <CardDescription>
+                Performance metrics based on actual project data will appear here
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                <TrendingUp className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">Performance Analytics Coming Soon</h3>
+                <p className="text-sm">
+                  This feature will calculate KPIs based on your actual project data
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="resources" className="space-y-6">
-          <ResourceManager />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Resource Management
+              </CardTitle>
+              <CardDescription>
+                Resource allocation features will be available when team member data is configured
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">Resource Management Coming Soon</h3>
+                <p className="text-sm">
+                  This feature will show team capacity and project assignments once configured
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="budget" className="space-y-6">
@@ -1329,15 +1376,86 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <AdvancedAnalytics />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Advanced Analytics
+              </CardTitle>
+              <CardDescription>
+                Advanced analytics and custom reports based on project data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">Advanced Analytics Coming Soon</h3>
+                <p className="text-sm">
+                  This feature will provide custom KPIs and detailed analytics once more project data is available
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="communication" className="space-y-6">
-          <CommunicationHub />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Communication Hub
+              </CardTitle>
+              <CardDescription>
+                Centralized communication logs and notifications will appear here
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">Communication Hub Coming Soon</h3>
+                <p className="text-sm">
+                  This feature will track project communications and team interactions
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-6">
-          <DocumentRepository />
+          {selectedProjectId && selectedProjectId !== 'all' ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Project Documents
+                </CardTitle>
+                <CardDescription>
+                  Documents for {recentProjects[0]?.name || 'Selected Project'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-muted-foreground">
+                  <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">No Documents Found</h3>
+                  <p className="text-sm">
+                    Upload documents in the project's Documents tab to see them here
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Document Repository
+                </CardTitle>
+                <CardDescription>
+                  Select a project to view its documents
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">
