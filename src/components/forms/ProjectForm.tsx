@@ -106,6 +106,19 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
+      // Validate required fields
+      if (!data.product_id || data.product_id === '') {
+        toast({
+          title: 'Error',
+          description: 'Please select a product',
+          variant: 'destructive',
+        })
+        setLoading(false)
+        return
+      }
+
+      console.log('Form data before submission:', data)
+
       const projectData = {
         name: data.name,
         description: data.description,
@@ -124,6 +137,8 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
         is_active: true
       }
 
+      console.log('Project data for submission:', projectData)
+
       if (project) {
         // Update existing project
         const { error } = await supabase
@@ -139,6 +154,11 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
         })
       } else {
         // Create new project
+        console.log('Attempting to insert project with data:', {
+          ...projectData,
+          created_by: user?.id
+        })
+        
         const { error } = await supabase
           .from('projects')
           .insert({
@@ -146,7 +166,10 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
             created_by: user?.id
           })
 
-        if (error) throw error
+        if (error) {
+          console.error('Supabase insert error:', error)
+          throw error
+        }
 
         toast({
           title: 'Success',
@@ -226,6 +249,7 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
               <Select
                 value={watch('product_id')}
                 onValueChange={(value) => setValue('product_id', value)}
+                required
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -238,6 +262,9 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
                   ))}
                 </SelectContent>
               </Select>
+              {!watch('product_id') && (
+                <p className="text-sm text-destructive">Product selection is required</p>
+              )}
             </div>
           </div>
 
