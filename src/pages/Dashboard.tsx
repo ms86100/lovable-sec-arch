@@ -109,8 +109,8 @@ export default function Dashboard() {
   
   // Project filter states
   const [products, setProducts] = useState<Product[]>([])
-  const [selectedProductId, setSelectedProductId] = useState<string>('')
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+  const [selectedProductId, setSelectedProductId] = useState<string>('all')
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all')
   const [availableProjects, setAvailableProjects] = useState<Project[]>([])
 
   const canCreateProducts = hasRole('manager') || hasRole('admin')
@@ -121,16 +121,16 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    if (selectedProductId) {
+    if (selectedProductId && selectedProductId !== 'all') {
       fetchProjectsForProduct(selectedProductId)
     } else {
       setAvailableProjects([])
-      setSelectedProjectId('')
+      setSelectedProjectId('all')
     }
   }, [selectedProductId])
 
   useEffect(() => {
-    if (selectedProjectId) {
+    if (selectedProjectId && selectedProjectId !== 'all') {
       fetchProjectSpecificData()
     }
   }, [selectedProjectId])
@@ -262,7 +262,7 @@ export default function Dashboard() {
   }
 
   const fetchProjectSpecificData = async () => {
-    if (!selectedProjectId) return
+    if (!selectedProjectId || selectedProjectId === 'all') return
     
     try {
       // Update stats to be project-specific
@@ -387,7 +387,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-lg mt-2">
             Welcome back, {user?.email}! You have <span className="font-medium text-airbus-blue">{userRole?.role}</span> access.
           </p>
-          {selectedProjectId && (
+          {selectedProjectId && selectedProjectId !== 'all' && (
             <p className="text-sm text-airbus-blue mt-1">
               Viewing: {availableProjects.find(p => p.id === selectedProjectId)?.name}
             </p>
@@ -423,7 +423,7 @@ export default function Dashboard() {
                   <SelectValue placeholder="Select a product" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Products</SelectItem>
+                  <SelectItem value="all">All Products</SelectItem>
                   {products.map((product) => (
                     <SelectItem key={product.id} value={product.id}>
                       {product.name}
@@ -438,13 +438,13 @@ export default function Dashboard() {
               <Select 
                 value={selectedProjectId} 
                 onValueChange={setSelectedProjectId}
-                disabled={!selectedProductId}
+                disabled={!selectedProductId || selectedProductId === 'all'}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a project" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Projects</SelectItem>
+                  <SelectItem value="all">All Projects</SelectItem>
                   {availableProjects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.name}
@@ -458,8 +458,8 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 onClick={() => {
-                  setSelectedProductId('')
-                  setSelectedProjectId('')
+                  setSelectedProductId('all')
+                  setSelectedProjectId('all')
                   fetchDashboardData()
                 }}
                 className="w-full"
@@ -883,9 +883,9 @@ export default function Dashboard() {
 
         <TabsContent value="timeline" className="space-y-6">
           <ProjectTimeline 
-            projects={selectedProjectId ? [recentProjects[0]].filter(Boolean) : filteredProjects} 
+            projects={selectedProjectId && selectedProjectId !== 'all' ? [recentProjects[0]].filter(Boolean) : filteredProjects} 
             onProjectClick={(id) => navigate(`/projects/${id}`)}
-            selectedProjectId={selectedProjectId}
+            selectedProjectId={selectedProjectId !== 'all' ? selectedProjectId : undefined}
           />
         </TabsContent>
 

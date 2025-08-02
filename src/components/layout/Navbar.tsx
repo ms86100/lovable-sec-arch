@@ -131,7 +131,7 @@ const Navbar = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={profile?.avatar_url || "/avatars/01.png"} alt="Avatar" />
+                      <AvatarImage src={profile?.avatar_url || undefined} alt="Avatar" />
                       <AvatarFallback>
                         {getInitials(profile?.first_name, profile?.last_name)}
                       </AvatarFallback>
