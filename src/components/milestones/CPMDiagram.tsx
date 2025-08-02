@@ -6,11 +6,13 @@ import {
   MiniMap,
   Node,
   Edge,
-  Position
+  Position,
+  MarkerType
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { CPMTask } from '@/lib/cpm'
 import { Badge } from '@/components/ui/badge'
+import { Network } from 'lucide-react'
 
 interface CPMDiagramProps {
   tasks: CPMTask[]
@@ -111,7 +113,7 @@ export function CPMDiagram({ tasks, criticalPath }: CPMDiagramProps) {
             strokeWidth: isCriticalEdge ? 3 : 1
           },
           markerEnd: {
-            type: 'arrowclosed' as any,
+            type: MarkerType.ArrowClosed,
             color: isCriticalEdge ? '#ef4444' : '#6b7280'
           }
         })
@@ -121,6 +123,17 @@ export function CPMDiagram({ tasks, criticalPath }: CPMDiagramProps) {
     return { nodes, edges }
   }, [tasks, criticalPath])
 
+  if (tasks.length === 0) {
+    return (
+      <div className="w-full h-[600px] border rounded-lg flex items-center justify-center">
+        <div className="text-center text-muted-foreground">
+          <Network className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>No tasks available for network diagram</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-[600px] border rounded-lg">
       <ReactFlow
@@ -128,6 +141,7 @@ export function CPMDiagram({ tasks, criticalPath }: CPMDiagramProps) {
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
+        fitViewOptions={{ padding: 0.2 }}
         attributionPosition="bottom-left"
       >
         <Background />
