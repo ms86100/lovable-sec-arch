@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { FileText, Plus, CalendarIcon, Edit, Trash2 } from 'lucide-react'
+import { FileText, Plus, CalendarIcon, Edit, Trash2, ExternalLink } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/integrations/supabase/client'
@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 interface Document {
   id: string
   document_name: string
+  document_url: string | null
   last_updated_date: string
   created_at: string
   updated_at: string
@@ -35,10 +36,9 @@ export function ProjectDocumentation({ projectId, projectName, readOnly = false 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingDocument, setEditingDocument] = useState<Document | null>(null)
 
-  const [formData, setFormData] = useState({
-    document_name: '',
-    last_updated_date: undefined as Date | undefined
-  })
+  const [documentEntries, setDocumentEntries] = useState([
+    { document_name: '', document_url: '' }
+  ])
 
   useEffect(() => {
     fetchDocuments()
@@ -70,44 +70,63 @@ export function ProjectDocumentation({ projectId, projectName, readOnly = false 
   }
 
   const resetForm = () => {
-    setFormData({
-      document_name: '',
-      last_updated_date: undefined
-    })
+    setDocumentEntries([{ document_name: '', document_url: '' }])
     setEditingDocument(null)
+  }
+
+  const addDocumentEntry = () => {
+    setDocumentEntries([...documentEntries, { document_name: '', document_url: '' }])
+  }
+
+  const removeDocumentEntry = (index: number) => {
+    if (documentEntries.length > 1) {
+      setDocumentEntries(documentEntries.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateDocumentEntry = (index: number, field: string, value: string) => {
+    const updated = documentEntries.map((entry, i) => 
+      i === index ? { ...entry, [field]: value } : entry
+    )
+    setDocumentEntries(updated)
   }
 
   const openEditDialog = (document: Document) => {
     setEditingDocument(document)
-    setFormData({
+    setDocumentEntries([{
       document_name: document.document_name,
-      last_updated_date: new Date(document.last_updated_date)
-    })
+      document_url: document.document_url || ''
+    }])
     setDialogOpen(true)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.last_updated_date) {
+    // Validate all entries
+    const validEntries = documentEntries.filter(entry => 
+      entry.document_name.trim() && entry.document_url.trim()
+    )
+
+    if (validEntries.length === 0) {
       toast({
         title: "Error",
-        description: "Please select a last updated date",
+        description: "Please add at least one document with both name and URL",
         variant: "destructive"
       })
       return
     }
 
     try {
-      const documentData = {
-        project_id: projectId,
-        document_name: formData.document_name,
-        last_updated_date: format(formData.last_updated_date, 'yyyy-MM-dd'),
-        created_by: user?.id,
-        updated_by: user?.id
-      }
-
       if (editingDocument) {
+        // Update existing document
+        const documentData = {
+          document_name: validEntries[0].document_name,
+          document_url: validEntries[0].document_url,
+          last_updated_date: format(new Date(), 'yyyy-MM-dd'),
+          updated_by: user?.id
+        }
+
         const { error } = await supabase
           .from('project_documentation')
           .update(documentData)
@@ -120,15 +139,25 @@ export function ProjectDocumentation({ projectId, projectName, readOnly = false 
           description: "Document updated successfully"
         })
       } else {
+        // Insert new documents
+        const documentsToInsert = validEntries.map(entry => ({
+          project_id: projectId,
+          document_name: entry.document_name,
+          document_url: entry.document_url,
+          last_updated_date: format(new Date(), 'yyyy-MM-dd'),
+          created_by: user?.id,
+          updated_by: user?.id
+        }))
+
         const { error } = await supabase
           .from('project_documentation')
-          .insert(documentData)
+          .insert(documentsToInsert)
 
         if (error) throw error
 
         toast({
           title: "Success",
-          description: "Document added successfully"
+          description: `${validEntries.length} document(s) added successfully`
         })
       }
 
@@ -228,44 +257,57 @@ export function ProjectDocumentation({ projectId, projectName, readOnly = false 
               </DialogHeader>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="document_name">Document Name *</Label>
-                  <Input
-                    id="document_name"
-                    value={formData.document_name}
-                    onChange={(e) => setFormData({...formData, document_name: e.target.value})}
-                    placeholder="e.g., Requirements Document, Design Specification"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Last Updated Date *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !formData.last_updated_date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.last_updated_date 
-                          ? format(formData.last_updated_date, 'PPP') 
-                          : 'Pick a date'
-                        }
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-medium">Documentation Entries</Label>
+                    {!editingDocument && (
+                      <Button type="button" variant="outline" size="sm" onClick={addDocumentEntry}>
+                        <Plus className="mr-1 h-3 w-3" />
+                        Add Entry
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={formData.last_updated_date}
-                        onSelect={(date) => setFormData({...formData, last_updated_date: date})}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                    )}
+                  </div>
+                  
+                  {documentEntries.map((entry, index) => (
+                    <div key={index} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Document {index + 1}</span>
+                        {!editingDocument && documentEntries.length > 1 && (
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => removeDocumentEntry(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`document_name_${index}`}>Document Name *</Label>
+                        <Input
+                          id={`document_name_${index}`}
+                          value={entry.document_name}
+                          onChange={(e) => updateDocumentEntry(index, 'document_name', e.target.value)}
+                          placeholder="e.g., Requirements Document, Design Specification"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`document_url_${index}`}>Document URL *</Label>
+                        <Input
+                          id={`document_url_${index}`}
+                          type="url"
+                          value={entry.document_url}
+                          onChange={(e) => updateDocumentEntry(index, 'document_url', e.target.value)}
+                          placeholder="https://example.com/document.pdf"
+                          required
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <DialogFooter>
@@ -273,7 +315,7 @@ export function ProjectDocumentation({ projectId, projectName, readOnly = false 
                     Cancel
                   </Button>
                   <Button type="submit">
-                    {editingDocument ? 'Update' : 'Add'} Document
+                    {editingDocument ? 'Update' : 'Add'} Document{documentEntries.length > 1 ? 's' : ''}
                   </Button>
                 </DialogFooter>
               </form>
@@ -315,7 +357,19 @@ export function ProjectDocumentation({ projectId, projectName, readOnly = false 
                       <FileText className="h-5 w-5 text-primary" />
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium">{document.document_name}</h4>
+                          {document.document_url ? (
+                            <a 
+                              href={document.document_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="font-medium text-primary hover:underline flex items-center gap-1"
+                            >
+                              {document.document_name}
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <h4 className="font-medium">{document.document_name}</h4>
+                          )}
                           <span className={`px-2 py-1 text-xs rounded-full ${
                             ageBadge.variant === 'default' ? 'bg-green-100 text-green-800' :
                             ageBadge.variant === 'secondary' ? 'bg-yellow-100 text-yellow-800' :

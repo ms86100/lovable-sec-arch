@@ -618,7 +618,7 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-3 gap-4">
+                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="task_status">Status</Label>
                                   <Select value={taskForm.status} onValueChange={(value) => setTaskForm({...taskForm, status: value})}>
@@ -633,38 +633,17 @@ export function ProjectTimeline({ projectId, projectName, readOnly = false }: Pr
                                   </Select>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="owner_type">Owner Type</Label>
-                                  <Select value={taskForm.owner_type} onValueChange={(value) => {
-                                    setTaskForm({...taskForm, owner_type: value, owner_id: ''})
-                                  }}>
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="stakeholder">Stakeholder</SelectItem>
-                                      <SelectItem value="team_member">Team Member</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-2">
                                   <Label htmlFor="task_owner">Owner</Label>
                                   <Select value={taskForm.owner_id} onValueChange={(value) => setTaskForm({...taskForm, owner_id: value})}>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select owner" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {taskForm.owner_type === 'stakeholder' 
-                                        ? stakeholders.map((stakeholder) => (
-                                            <SelectItem key={stakeholder.id} value={stakeholder.id}>
-                                              {stakeholder.name}
-                                            </SelectItem>
-                                          ))
-                                        : teamMembers.map((member) => (
-                                            <SelectItem key={member.user_id} value={member.user_id}>
-                                              {member.name}
-                                            </SelectItem>
-                                          ))
-                                      }
+                                      {stakeholders.map((stakeholder) => (
+                                        <SelectItem key={stakeholder.id} value={stakeholder.id}>
+                                          {stakeholder.name} - {stakeholder.email || 'No designation'}
+                                        </SelectItem>
+                                      ))}
                                     </SelectContent>
                                   </Select>
                                 </div>

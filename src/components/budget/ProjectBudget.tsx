@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { DollarSign, Plus, TrendingUp, TrendingDown } from 'lucide-react'
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/hooks/use-toast"
+import { BudgetSpending } from './BudgetSpending'
 
 interface BudgetItem {
   id: string
@@ -295,6 +296,9 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
           )}
         </CardContent>
       </Card>
+
+      {/* Spending Information Section */}
+      <BudgetSpending projectId={projectId} readOnly={readOnly} />
     </div>
   )
 }

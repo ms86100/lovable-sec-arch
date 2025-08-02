@@ -143,6 +143,8 @@ export type Database = {
           item_name: string
           planned_amount: number
           project_id: string
+          quotation_link: string | null
+          rfq_rom_link: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -157,6 +159,8 @@ export type Database = {
           item_name: string
           planned_amount?: number
           project_id: string
+          quotation_link?: string | null
+          rfq_rom_link?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -171,6 +175,8 @@ export type Database = {
           item_name?: string
           planned_amount?: number
           project_id?: string
+          quotation_link?: string | null
+          rfq_rom_link?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -223,6 +229,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           document_name: string
+          document_url: string | null
           id: string
           last_updated_date: string
           project_id: string
@@ -233,6 +240,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           document_name: string
+          document_url?: string | null
           id?: string
           last_updated_date: string
           project_id: string
@@ -243,6 +251,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           document_name?: string
+          document_url?: string | null
           id?: string
           last_updated_date?: string
           project_id?: string
