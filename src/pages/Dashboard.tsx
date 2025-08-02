@@ -880,7 +880,7 @@ export default function Dashboard() {
 
       {/* Enhanced Dashboard with Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full lg:w-auto lg:grid-cols-12">
+        <TabsList className="grid w-full lg:w-auto lg:grid-cols-11">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Overview
@@ -888,10 +888,6 @@ export default function Dashboard() {
           <TabsTrigger value="timeline" className="flex items-center gap-2">
             <BarChartIcon className="w-4 h-4" />
             Timeline
-          </TabsTrigger>
-          <TabsTrigger value="cpm" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Critical Path
           </TabsTrigger>
           <TabsTrigger value="risks" className="flex items-center gap-2">
             <Shield className="w-4 h-4" />

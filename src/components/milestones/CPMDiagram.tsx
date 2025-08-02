@@ -32,28 +32,28 @@ const CPMTaskNode = ({ data }: { data: any }) => {
       <div className="text-xs space-y-1">
         <div className="flex justify-between">
           <span>Duration:</span>
-          <span className="font-medium">{task.duration}h</span>
+          <span className="font-medium">{task.duration} days</span>
         </div>
         <div className="flex justify-between">
-          <span>ES:</span>
-          <span className="font-medium">{task.earlyStart || 0}</span>
+          <span>Start:</span>
+          <span className="font-medium">Day {task.earlyStart || 0}</span>
         </div>
         <div className="flex justify-between">
-          <span>EF:</span>
-          <span className="font-medium">{task.earlyFinish || 0}</span>
+          <span>End:</span>
+          <span className="font-medium">Day {task.earlyFinish || 0}</span>
         </div>
         <div className="flex justify-between">
-          <span>LS:</span>
-          <span className="font-medium">{task.lateStart || 0}</span>
+          <span>Latest Start:</span>
+          <span className="font-medium">Day {task.lateStart || 0}</span>
         </div>
         <div className="flex justify-between">
-          <span>LF:</span>
-          <span className="font-medium">{task.lateFinish || 0}</span>
+          <span>Latest End:</span>
+          <span className="font-medium">Day {task.lateFinish || 0}</span>
         </div>
         <div className="flex justify-between">
           <span>Slack:</span>
           <span className={`font-medium ${task.slack === 0 ? 'text-red-600' : 'text-green-600'}`}>
-            {task.slack || 0}
+            {task.slack || 0} days
           </span>
         </div>
       </div>

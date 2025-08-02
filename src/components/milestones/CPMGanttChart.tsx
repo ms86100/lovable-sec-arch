@@ -18,7 +18,7 @@ export function CPMGanttChart({ tasks, criticalPath, projectDuration }: CPMGantt
       <div className="border-b p-4">
         <h3 className="text-lg font-semibold">Critical Path Gantt Chart</h3>
         <p className="text-sm text-muted-foreground">
-          Project Duration: {projectDuration} hours | Critical Path highlighted in red
+          Project Duration: {projectDuration} days | Critical Path highlighted in red
         </p>
       </div>
       
@@ -29,16 +29,16 @@ export function CPMGanttChart({ tasks, criticalPath, projectDuration }: CPMGantt
           <div className="flex-1 p-3">
             <div className="relative">
               <div className="flex justify-between text-xs text-gray-600">
-                {Array.from({ length: Math.ceil(projectDuration) + 1 }, (_, i) => i).map(hour => (
-                  <span key={hour} className="text-center">
-                    {hour}h
+                {Array.from({ length: Math.ceil(projectDuration) + 1 }, (_, i) => i).map(day => (
+                  <span key={day} className="text-center">
+                    Day {day}
                   </span>
                 ))}
               </div>
               {/* Grid lines */}
               <div className="absolute top-6 left-0 right-0 flex justify-between">
-                {Array.from({ length: Math.ceil(projectDuration) + 1 }, (_, i) => i).map(hour => (
-                  <div key={hour} className="w-px bg-gray-200 h-4"></div>
+                {Array.from({ length: Math.ceil(projectDuration) + 1 }, (_, i) => i).map(day => (
+                  <div key={day} className="w-px bg-gray-200 h-4"></div>
                 ))}
               </div>
             </div>
@@ -66,7 +66,7 @@ export function CPMGanttChart({ tasks, criticalPath, projectDuration }: CPMGantt
                   )}
                 </div>
                 <div className="text-xs text-gray-600 mt-1">
-                  {task.duration}h | Slack: {task.slack || 0}h
+                  {task.duration} days | Slack: {task.slack || 0} days
                 </div>
               </div>
               
@@ -84,7 +84,7 @@ export function CPMGanttChart({ tasks, criticalPath, projectDuration }: CPMGantt
                       minWidth: '2px'
                     }}
                   >
-                    {width > 15 && `${task.duration}h`}
+                    {width > 15 && `${task.duration}d`}
                   </div>
                   
                   {/* Slack indicator */}
@@ -123,11 +123,14 @@ export function CPMGanttChart({ tasks, criticalPath, projectDuration }: CPMGantt
                 {/* Task Details Tooltip Area */}
                 <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity">
                   <div className="bg-black text-white text-xs p-2 rounded shadow-lg absolute top-10 left-2 z-10 whitespace-nowrap">
-                    <div>ES: {task.earlyStart} | EF: {task.earlyFinish}</div>
-                    <div>LS: {task.lateStart} | LF: {task.lateFinish}</div>
-                    <div>Slack: {task.slack}h</div>
+                    <div>Start: Day {task.earlyStart} | End: Day {task.earlyFinish}</div>
+                    <div>Latest Start: Day {task.lateStart} | Latest End: Day {task.lateFinish}</div>
+                    <div>Slack: {task.slack} days</div>
                     {task.dependencies.length > 0 && (
-                      <div>Dependencies: {task.dependencies.join(', ')}</div>
+                      <div>Dependencies: {task.dependencies.map(depId => {
+                        const depTask = tasks.find(t => t.id === depId)
+                        return depTask ? depTask.title : depId
+                      }).join(', ')}</div>
                     )}
                   </div>
                 </div>

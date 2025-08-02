@@ -76,12 +76,12 @@ export function CPMAnalysis({ projectId, projectName, milestoneId }: CPMAnalysis
     fetchTasks()
   }, [projectId, milestoneId])
 
-  // Convert database tasks to CPM format
+  // Convert database tasks to CPM format (using points as days)
   const cpmTasks: CPMTask[] = useMemo(() => {
     return tasks.map(task => ({
       id: task.id,
       title: task.title,
-      duration: task.estimated_effort_hours || 8, // Default 8 hours if not set
+      duration: task.estimated_effort_hours || 1, // Default 1 day if not set
       dependencies: Array.isArray(task.dependencies) ? task.dependencies : []
     }))
   }, [tasks])
@@ -337,7 +337,7 @@ export function CPMAnalysis({ projectId, projectName, milestoneId }: CPMAnalysis
           <Card>
             <CardContent className="p-4">
               <div className="text-sm text-muted-foreground">Project Duration</div>
-              <div className="text-2xl font-bold text-blue-600">{currentData.projectDuration} hours</div>
+              <div className="text-2xl font-bold text-blue-600">{currentData.projectDuration} days</div>
             </CardContent>
           </Card>
           <Card>
@@ -414,28 +414,28 @@ export function CPMAnalysis({ projectId, projectName, milestoneId }: CPMAnalysis
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
                       <div>
                         <div className="text-muted-foreground">Duration</div>
-                        <div className="font-medium">{task.duration}h</div>
+                        <div className="font-medium">{task.duration} days</div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground">Early Start</div>
-                        <div className="font-medium">{task.earlyStart}</div>
+                        <div className="text-muted-foreground">Start</div>
+                        <div className="font-medium">Day {task.earlyStart}</div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground">Early Finish</div>
-                        <div className="font-medium">{task.earlyFinish}</div>
+                        <div className="text-muted-foreground">End</div>
+                        <div className="font-medium">Day {task.earlyFinish}</div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground">Late Start</div>
-                        <div className="font-medium">{task.lateStart}</div>
+                        <div className="text-muted-foreground">Latest Start</div>
+                        <div className="font-medium">Day {task.lateStart}</div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground">Late Finish</div>
-                        <div className="font-medium">{task.lateFinish}</div>
+                        <div className="text-muted-foreground">Latest End</div>
+                        <div className="font-medium">Day {task.lateFinish}</div>
                       </div>
                       <div>
                         <div className="text-muted-foreground">Slack</div>
                         <div className={`font-medium ${task.slack === 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {task.slack}h
+                          {task.slack} days
                         </div>
                       </div>
                     </div>
