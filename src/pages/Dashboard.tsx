@@ -1249,22 +1249,19 @@ export default function Dashboard() {
               readOnly={true}
             />
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Project Timeline
-                </CardTitle>
-                <CardDescription>
-                  Select a project to view its timeline and milestones
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <ProjectMilestones 
+              projectId={null} 
+              readOnly={true} 
+              showProjectNames={true}
+            />
           )}
         </TabsContent>
 
         <TabsContent value="risks" className="space-y-6">
-          <RiskDashboard />
+          <RiskDashboard 
+            projectId={selectedProjectId !== 'all' ? selectedProjectId : undefined}
+            showProjectNames={selectedProjectId === 'all'}
+          />
         </TabsContent>
 
         <TabsContent value="raci" className="space-y-6">
@@ -1342,13 +1339,22 @@ export default function Dashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Project Budget
+                  <DollarSign className="h-5 w-5" />
+                  Cross-Project Budget View
                 </CardTitle>
                 <CardDescription>
-                  Select a project to view its budget details
+                  Budget overview across all projects will be available once budget data is configured
                 </CardDescription>
               </CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-muted-foreground">
+                  <DollarSign className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">Cross-Project Budget Coming Soon</h3>
+                  <p className="text-sm">
+                    This feature will aggregate budget data across all projects with individual project names
+                  </p>
+                </div>
+              </CardContent>
             </Card>
           )}
         </TabsContent>
@@ -1365,12 +1371,21 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  Stakeholders Management
+                  Cross-Project Stakeholders View
                 </CardTitle>
                 <CardDescription>
-                  Select a project to view its stakeholders
+                  Stakeholder overview across all projects will be available once stakeholder data is configured
                 </CardDescription>
               </CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">Cross-Project Stakeholders Coming Soon</h3>
+                  <p className="text-sm">
+                    This feature will show stakeholder data across all projects with project identification
+                  </p>
+                </div>
+              </CardContent>
             </Card>
           )}
         </TabsContent>
@@ -1458,9 +1473,33 @@ export default function Dashboard() {
           )}
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-6">
-          <SecurityCenter />
-        </TabsContent>
+          <TabsContent value="security" className="space-y-6">
+            <Card className="airbus-card">
+              <CardContent className="p-12 text-center">
+                <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-lg font-medium mb-2">Security Center Available in Project View</h3>
+                <p className="text-muted-foreground mb-4">
+                  Please select a specific project to access security compliance and audit information.
+                  Security data is project-specific and cannot be displayed at the global level.
+                </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="font-medium">Note about Security Data</span>
+                  </div>
+                  <p>
+                    The Security Center currently uses demonstration data for display purposes. 
+                    Real security audit logs and compliance data will be populated based on actual project activities and configurations.
+                  </p>
+                </div>
+                {selectedProductId !== 'all' && (
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Select a project from the "{products.find(p => p.id === selectedProductId)?.name}" product above to view security details.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
       </Tabs>
     </div>
   )

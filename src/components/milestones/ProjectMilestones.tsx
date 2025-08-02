@@ -15,6 +15,7 @@ interface Milestone {
   status: string
   progress: number
   tasks?: Task[]
+  project_name?: string
 }
 
 interface Task {
@@ -33,39 +34,49 @@ interface Task {
 interface ProjectMilestonesProps {
   projectId: string | null
   readOnly?: boolean
+  showProjectNames?: boolean
 }
 
-export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilestonesProps) {
+export function ProjectMilestones({ projectId, readOnly = false, showProjectNames = false }: ProjectMilestonesProps) {
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (projectId) {
-      fetchMilestones()
-    } else {
-      setMilestones([])
-      setLoading(false)
-    }
-  }, [projectId])
+    fetchMilestones()
+  }, [projectId, showProjectNames])
 
   const fetchMilestones = async () => {
-    if (!projectId) return
-
     try {
       setLoading(true)
       
-      // Fetch milestones
-      const { data: milestonesData, error: milestonesError } = await supabase
+      // Fetch milestones with project info
+      let baseQuery = supabase
         .from('project_milestones')
         .select('*')
-        .eq('project_id', projectId)
         .order('due_date', { ascending: true })
+        
+      if (projectId) {
+        baseQuery = baseQuery.eq('project_id', projectId)
+      }
+      
+      const { data: milestonesData, error: milestonesError } = await baseQuery
 
       if (milestonesError) throw milestonesError
 
-      // Fetch tasks for each milestone
+      // Fetch project names and tasks for each milestone
       const milestonesWithTasks = await Promise.all(
         (milestonesData || []).map(async (milestone) => {
+          // Fetch project name if showing project names
+          let project_name = ''
+          if (showProjectNames && milestone.project_id) {
+            const { data: projectData } = await supabase
+              .from('projects')
+              .select('name')
+              .eq('id', milestone.project_id)
+              .single()
+            project_name = projectData?.name || ''
+          }
+          
           const { data: tasksData, error: tasksError } = await supabase
             .from('project_tasks')
             .select('*')
@@ -74,7 +85,7 @@ export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilest
 
           if (tasksError) {
             console.error('Error fetching tasks:', tasksError)
-            return { ...milestone, tasks: [] }
+            return { ...milestone, tasks: [], project_name }
           }
 
           // Fetch owner names separately based on owner_type and owner_id
@@ -104,7 +115,11 @@ export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilest
             })
           )
 
-          return { ...milestone, tasks: tasksWithOwners }
+          return { 
+            ...milestone, 
+            tasks: tasksWithOwners,
+            project_name
+          }
         })
       )
 
@@ -168,7 +183,7 @@ export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilest
     }
   }
 
-  if (!projectId) {
+  if (!projectId && !showProjectNames) {
     return (
       <Card>
         <CardHeader>
@@ -241,13 +256,18 @@ export function ProjectMilestones({ projectId, readOnly = false }: ProjectMilest
               <div key={milestone.id} className="border rounded-lg p-4">
                  <div className="flex items-start justify-between mb-3">
                    <div className="flex-1">
-                     <div className="flex items-center gap-2 mb-1">
-                       {getStatusIcon(milestone.status)}
-                       <h3 className="font-semibold">{milestone.title}</h3>
-                       <Badge className={getStatusColor(milestone.status)}>
-                         {milestone.status.replace('_', ' ')}
-                       </Badge>
-                     </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        {getStatusIcon(milestone.status)}
+                        <h3 className="font-semibold">{milestone.title}</h3>
+                        <Badge className={getStatusColor(milestone.status)}>
+                          {milestone.status.replace('_', ' ')}
+                        </Badge>
+                        {showProjectNames && milestone.project_name && (
+                          <Badge variant="outline" className="ml-2">
+                            {milestone.project_name}
+                          </Badge>
+                        )}
+                      </div>
                      {milestone.description && (
                        <p className="text-sm text-muted-foreground mb-2">
                          {milestone.description}

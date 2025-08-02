@@ -31,7 +31,12 @@ interface RiskStats {
   avgRiskScore: number
 }
 
-export function RiskDashboard() {
+interface RiskDashboardProps {
+  projectId?: string
+  showProjectNames?: boolean
+}
+
+export function RiskDashboard({ projectId, showProjectNames = false }: RiskDashboardProps) {
   const [risks, setRisks] = useState<Risk[]>([])
   const [stats, setStats] = useState<RiskStats>({
     totalRisks: 0,
@@ -45,18 +50,25 @@ export function RiskDashboard() {
 
   useEffect(() => {
     fetchRiskData()
-  }, [])
+  }, [projectId])
 
   const fetchRiskData = async () => {
     try {
-      const { data: risksData, error } = await supabase
+      let query = supabase
         .from('project_risks')
         .select(`
           *,
           projects!inner (name)
         `)
         .order('risk_score', { ascending: false })
-        .limit(10)
+        
+      if (projectId) {
+        query = query.eq('project_id', projectId)
+      } else {
+        query = query.limit(10)
+      }
+      
+      const { data: risksData, error } = await query
 
       if (error) throw error
 
@@ -229,7 +241,7 @@ export function RiskDashboard() {
                       {risk.description}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Project: {risk.projects.name}</span>
+                      {showProjectNames && <span>Project: {risk.projects.name}</span>}
                       <span>Impact: {risk.impact}</span>
                       <span>Probability: {risk.probability}</span>
                     </div>
