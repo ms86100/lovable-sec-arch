@@ -14,7 +14,8 @@ import {
   Search,
   User,
   LogOut,
-  Shield
+  Shield,
+  FileText
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ const Navbar = () => {
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Projects", path: "/projects", icon: FolderOpen },
+    { name: "Templates", path: "/templates", icon: FileText },
     { name: "Tasks", path: "/tasks", icon: CheckSquare },
     { name: "Team", path: "/team", icon: Users },
     { name: "Analytics", path: "/analytics", icon: BarChart3 },
