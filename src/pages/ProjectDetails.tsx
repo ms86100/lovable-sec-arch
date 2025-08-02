@@ -17,6 +17,7 @@ import { ProjectDocumentation } from '@/components/documentation/ProjectDocument
 import { ProjectForm } from '@/components/forms/ProjectForm'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ProjectAOP } from '@/components/aop/ProjectAOP'
+import { CPMAnalysis } from '@/components/milestones/CPMAnalysis'
 import { 
   ArrowLeft, 
   Calendar, 
@@ -31,7 +32,8 @@ import {
   Settings,
   Edit,
   Shield,
-  BarChart3
+  BarChart3,
+  TrendingUp
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
@@ -265,7 +267,7 @@ const ProjectDetails = () => {
 
         {/* Project Details Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10 text-xs">
+          <TabsList className="grid w-full grid-cols-11 text-xs">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <Package className="w-3 h-3" />
               Overview
@@ -281,6 +283,10 @@ const ProjectDetails = () => {
             <TabsTrigger value="aop" className="flex items-center gap-1">
               <BarChart3 className="w-3 h-3" />
               AOP
+            </TabsTrigger>
+            <TabsTrigger value="cpm" className="flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" />
+              Critical Path
             </TabsTrigger>
             <TabsTrigger value="stakeholders" className="flex items-center gap-1">
               <Users className="w-3 h-3" />
@@ -402,6 +408,10 @@ const ProjectDetails = () => {
 
           <TabsContent value="aop" className="space-y-6">
             <ProjectAOP projectId={project.id} projectName={project.name} />
+          </TabsContent>
+
+          <TabsContent value="cpm" className="space-y-6">
+            <CPMAnalysis projectId={project.id} projectName={project.name} />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">

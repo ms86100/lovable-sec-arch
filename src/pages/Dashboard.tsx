@@ -47,7 +47,7 @@ import SecurityCenter from '@/components/security/SecurityCenter'
 import { ProjectMilestones } from '@/components/milestones/ProjectMilestones'
 import { ProjectBudget } from '@/components/budget/ProjectBudget'
 import { StakeholdersManager } from '@/components/stakeholders/StakeholdersManager'
-import { CPMAnalysis } from '@/components/milestones/CPMAnalysis'
+
 
 interface DashboardStats {
   totalProducts: number
@@ -1262,11 +1262,6 @@ export default function Dashboard() {
           )}
         </TabsContent>
 
-        <TabsContent value="cpm" className="space-y-6">
-          <CPMAnalysis 
-            projectId={selectedProjectId !== 'all' ? selectedProjectId : null}
-          />
-        </TabsContent>
 
         <TabsContent value="risks" className="space-y-6">
           <RiskDashboard 

@@ -19,11 +19,12 @@ interface Task {
 }
 
 interface CPMAnalysisProps {
-  projectId: string | null
-  milestoneId?: string | null
+  projectId?: string
+  projectName?: string
+  milestoneId?: string
 }
 
-export function CPMAnalysis({ projectId, milestoneId }: CPMAnalysisProps) {
+export function CPMAnalysis({ projectId, projectName, milestoneId }: CPMAnalysisProps) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [showExample, setShowExample] = useState(false)
@@ -317,7 +318,8 @@ export function CPMAnalysis({ projectId, milestoneId }: CPMAnalysisProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Critical Path Method (CPM) Analysis
+              Critical Path Method Analysis
+              {projectName && <span className="text-sm font-normal text-muted-foreground">for: {projectName}</span>}
             </CardTitle>
             <CardDescription>
               Analyze project timeline and identify critical tasks
