@@ -3,8 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { DollarSign, Plus, TrendingUp, TrendingDown } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DollarSign, Plus, TrendingUp, TrendingDown, Edit, Trash2 } from 'lucide-react'
 import { supabase } from "@/integrations/supabase/client"
+import { useAuth } from '@/hooks/useAuth'
 import { toast } from "@/hooks/use-toast"
 import { BudgetSpending } from './BudgetSpending'
 
@@ -33,6 +39,7 @@ interface ProjectBudgetProps {
 }
 
 export function ProjectBudget({ projectId, projectBudget, readOnly = false }: ProjectBudgetProps) {
+  const { user } = useAuth()
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([])
   const [summary, setSummary] = useState<BudgetSummary>({
     totalPlanned: 0,
@@ -42,6 +49,16 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
     categoryBreakdown: {}
   })
   const [loading, setLoading] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<BudgetItem | null>(null)
+
+  const [formData, setFormData] = useState({
+    category: 'labor',
+    item_name: '',
+    planned_amount: '',
+    actual_amount: '',
+    description: ''
+  })
 
   useEffect(() => {
     if (projectId) {
@@ -108,6 +125,107 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({
+      category: 'labor',
+      item_name: '',
+      planned_amount: '',
+      actual_amount: '',
+      description: ''
+    })
+    setEditingItem(null)
+  }
+
+  const openEditDialog = (item: BudgetItem) => {
+    setEditingItem(item)
+    setFormData({
+      category: item.category,
+      item_name: item.item_name,
+      planned_amount: item.planned_amount.toString(),
+      actual_amount: item.actual_amount.toString(),
+      description: item.description || ''
+    })
+    setDialogOpen(true)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const budgetData = {
+        project_id: projectId,
+        category: formData.category,
+        item_name: formData.item_name,
+        planned_amount: parseFloat(formData.planned_amount) || 0,
+        actual_amount: parseFloat(formData.actual_amount) || 0,
+        description: formData.description || null,
+        created_by: user?.id,
+        updated_by: user?.id
+      }
+
+      if (editingItem) {
+        const { error } = await supabase
+          .from('project_budget_items')
+          .update(budgetData)
+          .eq('id', editingItem.id)
+
+        if (error) throw error
+
+        toast({
+          title: "Success",
+          description: "Budget item updated successfully"
+        })
+      } else {
+        const { error } = await supabase
+          .from('project_budget_items')
+          .insert(budgetData)
+
+        if (error) throw error
+
+        toast({
+          title: "Success",
+          description: "Budget item added successfully"
+        })
+      }
+
+      setDialogOpen(false)
+      resetForm()
+      fetchBudgetData()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this budget item?')) return
+
+    try {
+      const { error } = await supabase
+        .from('project_budget_items')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast({
+        title: "Success",
+        description: "Budget item deleted successfully"
+      })
+
+      fetchBudgetData()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
     }
   }
 
@@ -237,10 +355,101 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
               </CardDescription>
             </div>
             {!readOnly && (
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Budget Item
-              </Button>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" onClick={() => { resetForm(); setDialogOpen(true) }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Budget Item
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingItem ? 'Edit Budget Item' : 'Add New Budget Item'}
+                    </DialogTitle>
+                    <DialogDescription>
+                      Track planned vs actual spending for project expenses
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category *</Label>
+                        <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="labor">Labor</SelectItem>
+                            <SelectItem value="materials">Materials</SelectItem>
+                            <SelectItem value="equipment">Equipment</SelectItem>
+                            <SelectItem value="software">Software</SelectItem>
+                            <SelectItem value="travel">Travel</SelectItem>
+                            <SelectItem value="training">Training</SelectItem>
+                            <SelectItem value="consulting">Consulting</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="item_name">Item Name *</Label>
+                        <Input
+                          id="item_name"
+                          value={formData.item_name}
+                          onChange={(e) => setFormData({...formData, item_name: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="planned_amount">Planned Amount ($) *</Label>
+                        <Input
+                          id="planned_amount"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData.planned_amount}
+                          onChange={(e) => setFormData({...formData, planned_amount: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="actual_amount">Actual Amount ($)</Label>
+                        <Input
+                          id="actual_amount"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData.actual_amount}
+                          onChange={(e) => setFormData({...formData, actual_amount: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        placeholder="Additional details about this expense..."
+                      />
+                    </div>
+
+                    <DialogFooter>
+                      <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">
+                        {editingItem ? 'Update' : 'Add'} Budget Item
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             )}
           </div>
         </CardHeader>
@@ -279,13 +488,25 @@ export function ProjectBudget({ projectId, projectBudget, readOnly = false }: Pr
                               <p className="text-xs text-muted-foreground">{item.description}</p>
                             )}
                           </div>
-                          <div className="text-right text-sm">
-                            <div className="font-medium">
-                              {formatCurrency(item.actual_amount || 0)}
+                          <div className="flex items-center gap-2">
+                            <div className="text-right text-sm">
+                              <div className="font-medium">
+                                {formatCurrency(item.actual_amount || 0)}
+                              </div>
+                              <div className="text-muted-foreground">
+                                of {formatCurrency(item.planned_amount || 0)}
+                              </div>
                             </div>
-                            <div className="text-muted-foreground">
-                              of {formatCurrency(item.planned_amount || 0)}
-                            </div>
+                            {!readOnly && (
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="sm" onClick={() => openEditDialog(item)}>
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
