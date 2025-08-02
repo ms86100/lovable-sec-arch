@@ -8,6 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Airbus-inspired color palette */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -17,80 +18,121 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 40% 98%;
+    /* Airbus Blue as primary */
+    --primary: 214 100% 35%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 214 100% 55%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary grays with blue undertones */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 210 10% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 20% 94%;
+    --accent-foreground: 210 10% 20%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: 214 100% 35%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Airbus-specific colors */
+    --airbus-blue: 214 100% 35%;
+    --airbus-blue-light: 214 100% 55%;
+    --airbus-blue-dark: 214 100% 25%;
+    --airbus-gray: 210 10% 20%;
+    --airbus-gray-light: 210 20% 96%;
+    --airbus-silver: 210 10% 85%;
+    
+    /* Status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--airbus-blue)), hsl(var(--airbus-blue-light)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--airbus-gray-light)), hsl(var(--airbus-silver)));
+    
+    /* Shadows */
+    --shadow-airbus: 0 4px 16px -4px hsl(var(--airbus-blue) / 0.2);
+    --shadow-elegant: 0 8px 32px -8px hsl(var(--airbus-blue) / 0.15);
+    
+    /* Sidebar colors */
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 210 10% 20%;
+    --sidebar-primary: 214 100% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 94%;
+    --sidebar-accent-foreground: 210 10% 20%;
+    --sidebar-border: 214 20% 90%;
+    --sidebar-ring: 214 100% 35%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Dark mode Airbus theme */
+    --background: 214 100% 4%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 214 50% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 214 50% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 214 100% 55%;
+    --primary-foreground: 214 100% 4%;
+    --primary-glow: 214 100% 65%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 214 30% 15%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 214 30% 15%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 214 30% 20%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 214 30% 15%;
+    --input: 214 30% 15%;
+    --ring: 214 100% 55%;
+
+    /* Dark mode Airbus colors */
+    --airbus-blue: 214 100% 55%;
+    --airbus-blue-light: 214 100% 65%;
+    --airbus-blue-dark: 214 100% 35%;
+    --airbus-gray: 210 20% 85%;
+    --airbus-gray-light: 214 30% 15%;
+    --airbus-silver: 210 10% 35%;
+    
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--airbus-blue)), hsl(var(--airbus-blue-light)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--airbus-gray-light)), hsl(var(--airbus-silver)));
+    
+    /* Dark mode shadows */
+    --shadow-airbus: 0 4px 16px -4px hsl(var(--airbus-blue) / 0.3);
+    --shadow-elegant: 0 8px 32px -8px hsl(var(--airbus-blue) / 0.25);
+    
+    /* Dark sidebar */
+    --sidebar-background: 214 50% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 214 100% 55%;
+    --sidebar-primary-foreground: 214 100% 4%;
+    --sidebar-accent: 214 30% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 214 30% 15%;
+    --sidebar-ring: 214 100% 55%;
   }
 }
 
@@ -101,5 +143,71 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Airbus-inspired components */
+  .airbus-card {
+    @apply bg-card border border-border rounded-lg shadow-sm hover:shadow-[var(--shadow-airbus)] transition-all duration-300;
+  }
+  
+  .airbus-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .airbus-button-primary {
+    @apply bg-[hsl(var(--airbus-blue))] text-white hover:bg-[hsl(var(--airbus-blue-dark))] shadow-[var(--shadow-airbus)] transition-all duration-200;
+  }
+  
+  .status-indicator {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-active {
+    @apply bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))] border border-[hsl(var(--success)/0.2)];
+  }
+  
+  .status-planning {
+    @apply bg-[hsl(var(--info)/0.1)] text-[hsl(var(--info))] border border-[hsl(var(--info)/0.2)];
+  }
+  
+  .status-completed {
+    @apply bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))] border border-[hsl(var(--primary)/0.2)];
+  }
+  
+  .status-warning {
+    @apply bg-[hsl(var(--warning)/0.1)] text-[hsl(var(--warning))] border border-[hsl(var(--warning)/0.2)];
+  }
+  
+  .kpi-card {
+    @apply bg-gradient-to-br from-card to-accent/50 border border-border rounded-lg p-6 hover:shadow-[var(--shadow-elegant)] transition-all duration-300 group;
+  }
+  
+  .timeline-item {
+    @apply relative pl-8 pb-6 before:absolute before:left-3 before:top-2 before:w-2 before:h-2 before:bg-[hsl(var(--airbus-blue))] before:rounded-full before:z-10;
+  }
+  
+  .timeline-item::after {
+    @apply absolute left-3.5 top-4 w-0.5 h-full bg-border;
+    content: '';
+  }
+  
+  .timeline-item:last-child::after {
+    @apply hidden;
+  }
+}
+
+@layer utilities {
+  .text-airbus-blue {
+    color: hsl(var(--airbus-blue));
+  }
+  
+  .bg-airbus-blue {
+    background-color: hsl(var(--airbus-blue));
+  }
+  
+  .border-airbus-blue {
+    border-color: hsl(var(--airbus-blue));
   }
 }

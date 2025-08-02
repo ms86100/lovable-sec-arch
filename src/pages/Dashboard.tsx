@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Package, 
   FolderOpen, 
@@ -25,10 +26,16 @@ import {
   FileText,
   Settings,
   BarChart3,
-  Zap
+  Zap,
+  Shield,
+  Timeline,
+  Eye
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
+import ProjectTimeline from '@/components/timeline/ProjectTimeline'
+import RiskDashboard from '@/components/risks/RiskDashboard'
+import RACIMatrix from '@/components/raci/RACIMatrix'
 
 interface DashboardStats {
   totalProducts: number
@@ -250,18 +257,20 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="space-y-6 p-6 animate-fade-in">
+      {/* Header with Airbus styling */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {user?.email}! You have {userRole?.role} access.
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-airbus-blue to-airbus-blue-light bg-clip-text text-transparent">
+            Project Command Center
+          </h1>
+          <p className="text-muted-foreground text-lg mt-2">
+            Welcome back, {user?.email}! You have <span className="font-medium text-airbus-blue">{userRole?.role}</span> access.
           </p>
         </div>
         <div className="flex gap-3">
           {canCreateProducts && (
-            <Button onClick={() => navigate('/products')}>
+            <Button className="airbus-button-primary" onClick={() => navigate('/products')}>
               <Package className="w-4 h-4 mr-2" />
               Manage Products
             </Button>
@@ -269,194 +278,231 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Enhanced KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        <Card className="border-border hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Products</CardTitle>
-            <Package className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
-            <p className="text-xs text-muted-foreground">Active portfolio</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Projects</CardTitle>
-            <FolderOpen className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProjects}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active</CardTitle>
-            <Activity className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeProjects}</div>
-            <p className="text-xs text-muted-foreground">In progress</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">This Week</CardTitle>
-            <Calendar className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.projectsThisWeek}</div>
-            <p className="text-xs text-muted-foreground">New projects</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Avg Progress</CardTitle>
-            <Target className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.avgProgress}%</div>
-            <p className="text-xs text-muted-foreground">Overall completion</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Templates</CardTitle>
-            <FileText className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.templatesUsed}</div>
-            <p className="text-xs text-muted-foreground">Using templates</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Status Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-border">
-          <CardContent className="flex items-center p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+      {/* Enhanced KPI Cards with Airbus Design */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-slide-up">
+        <Card className="kpi-card group animate-scale-in">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Active</p>
-                <p className="text-2xl font-bold">{stats.activeProjects}</p>
+                <p className="text-sm font-medium text-muted-foreground">Products</p>
+                <p className="text-3xl font-bold text-airbus-blue">{stats.totalProducts}</p>
+                <p className="text-xs text-muted-foreground mt-1">Active portfolio</p>
               </div>
+              <Package className="h-8 w-8 text-airbus-blue group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="border-border">
-          <CardContent className="flex items-center p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+
+        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.1s' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Planning</p>
-                <p className="text-2xl font-bold">{stats.planningProjects}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Projects</p>
+                <p className="text-3xl font-bold text-airbus-blue">{stats.totalProjects}</p>
+                <p className="text-xs text-muted-foreground mt-1">All time</p>
               </div>
+              <FolderOpen className="h-8 w-8 text-airbus-blue group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="border-border">
-          <CardContent className="flex items-center p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+
+        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.2s' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Completed</p>
-                <p className="text-2xl font-bold">{stats.completedProjects}</p>
+                <p className="text-sm font-medium text-muted-foreground">Active</p>
+                <p className="text-3xl font-bold text-success">{stats.activeProjects}</p>
+                <p className="text-xs text-muted-foreground mt-1">In progress</p>
               </div>
+              <Activity className="h-8 w-8 text-success group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="border-border">
-          <CardContent className="flex items-center p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+
+        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.3s' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">On Hold</p>
-                <p className="text-2xl font-bold">{stats.onHoldProjects}</p>
+                <p className="text-sm font-medium text-muted-foreground">This Week</p>
+                <p className="text-3xl font-bold text-info">{stats.projectsThisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-1">New projects</p>
               </div>
+              <Calendar className="h-8 w-8 text-info group-hover:animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.4s' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Avg Progress</p>
+                <p className="text-3xl font-bold text-primary">{stats.avgProgress}%</p>
+                <p className="text-xs text-muted-foreground mt-1">Overall completion</p>
+              </div>
+              <Target className="h-8 w-8 text-primary group-hover:animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="kpi-card group animate-scale-in" style={{ animationDelay: '0.5s' }}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Templates</p>
+                <p className="text-3xl font-bold text-warning">{stats.templatesUsed}</p>
+                <p className="text-xs text-muted-foreground mt-1">Using templates</p>
+              </div>
+              <FileText className="h-8 w-8 text-warning group-hover:animate-pulse" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* Recent Projects - Enhanced */}
-        <div className="xl:col-span-3">
-          <Card className="border-border">
-            <CardHeader>
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                  <CardTitle>Project Overview</CardTitle>
-                  <CardDescription>Manage and track your projects</CardDescription>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Search projects..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 w-full sm:w-64"
-                    />
+      {/* Status Overview Cards with Airbus styling */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-slide-up">
+        <Card className="airbus-card status-active">
+          <CardContent className="flex items-center p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-success rounded-full shadow-lg"></div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active</p>
+                <p className="text-3xl font-bold text-success">{stats.activeProjects}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="airbus-card status-planning">
+          <CardContent className="flex items-center p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-info rounded-full shadow-lg"></div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Planning</p>
+                <p className="text-3xl font-bold text-info">{stats.planningProjects}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="airbus-card status-completed">
+          <CardContent className="flex items-center p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-primary rounded-full shadow-lg"></div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-3xl font-bold text-primary">{stats.completedProjects}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="airbus-card status-warning">
+          <CardContent className="flex items-center p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-warning rounded-full shadow-lg"></div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">On Hold</p>
+                <p className="text-3xl font-bold text-warning">{stats.onHoldProjects}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Enhanced Dashboard with Tabs */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full lg:w-auto lg:grid-cols-4">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="timeline" className="flex items-center gap-2">
+            <Timeline className="w-4 h-4" />
+            Timeline
+          </TabsTrigger>
+          <TabsTrigger value="risks" className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            Risk Management
+          </TabsTrigger>
+          <TabsTrigger value="raci" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            RACI Matrix
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            {/* Recent Projects - Enhanced */}
+            <div className="xl:col-span-3">
+              <Card className="airbus-card">
+                <CardHeader>
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <FolderOpen className="w-5 h-5 text-airbus-blue" />
+                        Project Overview
+                      </CardTitle>
+                      <CardDescription>Manage and track your projects</CardDescription>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                        <Input
+                          placeholder="Search projects..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-9 w-full sm:w-64"
+                        />
+                      </div>
+                      <Select value={filterStatus} onValueChange={setFilterStatus}>
+                        <SelectTrigger className="w-full sm:w-32">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="planning">Planning</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="on_hold">On Hold</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select value={filterPriority} onValueChange={setFilterPriority}>
+                        <SelectTrigger className="w-full sm:w-32">
+                          <SelectValue placeholder="Priority" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Priority</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="low">Low</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="outline" size="sm" onClick={() => navigate('/projects')}>
+                        View All
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
                   </div>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-full sm:w-32">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="planning">Planning</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="on_hold">On Hold</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={filterPriority} onValueChange={setFilterPriority}>
-                    <SelectTrigger className="w-full sm:w-32">
-                      <SelectValue placeholder="Priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Priority</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="sm" onClick={() => navigate('/projects')}>
-                    View All
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {filteredProjects.length > 0 ? (
-                filteredProjects.map((project) => (
-                  <div key={project.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                       onClick={() => navigate(`/projects/${project.id}`)}>
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-medium truncate">{project.name}</h4>
-                          <Badge variant={getStatusVariant(project.status)}>
-                            {project.status.replace('_', ' ')}
-                          </Badge>
-                          <Badge variant={getPriorityVariant(project.priority)} className={getPriorityColor(project.priority)}>
-                            {project.priority}
-                          </Badge>
-                        </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {filteredProjects.length > 0 ? (
+                    filteredProjects.map((project) => (
+                      <div key={project.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-all duration-200 cursor-pointer group"
+                           onClick={() => navigate(`/projects/${project.id}`)}>
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-medium truncate group-hover:text-airbus-blue transition-colors">{project.name}</h4>
+                              <Badge variant={getStatusVariant(project.status)} className="status-indicator">
+                                {project.status.replace('_', ' ')}
+                              </Badge>
+                              <Badge variant={getPriorityVariant(project.priority)} className={getPriorityColor(project.priority)}>
+                                {project.priority}
+                              </Badge>
+                            </div>
                         
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
                           <div className="flex items-center">
@@ -610,8 +656,27 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+            </div>
+          </Card>
         </div>
       </div>
-    </div>
+    </TabsContent>
+
+    <TabsContent value="timeline" className="space-y-6">
+      <ProjectTimeline 
+        projects={recentProjects} 
+        onProjectClick={(projectId) => navigate(`/projects/${projectId}`)} 
+      />
+    </TabsContent>
+
+    <TabsContent value="risks" className="space-y-6">
+      <RiskDashboard />
+    </TabsContent>
+
+    <TabsContent value="raci" className="space-y-6">
+      <RACIMatrix showAllProjects={true} />
+    </TabsContent>
+  </Tabs>
+</div>
   )
 }
