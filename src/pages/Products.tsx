@@ -22,11 +22,6 @@ interface Product {
   updated_at: string
   created_by: string | null
   updated_by: string | null
-  profiles?: {
-    first_name: string | null
-    last_name: string | null
-    email: string | null
-  } | null
   project_count?: number
 }
 
@@ -47,19 +42,12 @@ export default function Products() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select(`
-          *,
-          profiles:owner_id (
-            first_name,
-            last_name,
-            email
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
 
-      // Get project counts for each product and handle profiles data
+      // Get project counts for each product
       const productsWithCounts = await Promise.all(
         (data || []).map(async (product) => {
           const { count } = await supabase
@@ -67,27 +55,9 @@ export default function Products() {
             .select('*', { count: 'exact', head: true })
             .eq('product_id', product.id)
 
-          // Handle the profile data properly
-          let profiles = null
-          try {
-            if (product.profiles && typeof product.profiles === 'object' && 'first_name' in product.profiles!) {
-              profiles = product.profiles! as unknown as { first_name: string | null; last_name: string | null; email: string | null }
-            }
-          } catch (e) {
-            // Profile data might be malformed, set to null
-          }
-
           return {
-            id: product.id,
-            name: product.name,
-            description: product.description,
-            owner_id: product.owner_id,
+            ...product,
             tags: product.tags || [],
-            created_at: product.created_at,
-            updated_at: product.updated_at,
-            created_by: product.created_by,
-            updated_by: product.updated_by,
-            profiles,
             project_count: count || 0
           }
         })
@@ -313,7 +283,7 @@ export default function Products() {
                   </div>
                   <div className="flex items-center gap-1">
                     <User className="w-4 h-4" />
-                    {product.profiles?.first_name} {product.profiles?.last_name}
+                    Owner: {product.owner_id.slice(0, 8)}...
                   </div>
                 </div>
 
