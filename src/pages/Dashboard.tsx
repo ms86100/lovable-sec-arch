@@ -41,9 +41,7 @@ import { useNavigate } from 'react-router-dom'
 import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
 import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
 import RiskDashboard from '@/components/risks/RiskDashboard'
-import RACIMatrix from '@/components/raci/RACIMatrix'
 import { BudgetTracker } from '@/components/budget/BudgetTracker'
-import SecurityCenter from '@/components/security/SecurityCenter'
 import { ProjectMilestones } from '@/components/milestones/ProjectMilestones'
 import { ProjectBudget } from '@/components/budget/ProjectBudget'
 import { StakeholdersManager } from '@/components/stakeholders/StakeholdersManager'
@@ -880,7 +878,7 @@ export default function Dashboard() {
 
       {/* Enhanced Dashboard with Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full lg:w-auto lg:grid-cols-11">
+        <TabsList className="grid w-full lg:w-auto lg:grid-cols-9">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Overview
@@ -892,10 +890,6 @@ export default function Dashboard() {
           <TabsTrigger value="risks" className="flex items-center gap-2">
             <Shield className="w-4 h-4" />
             Risk Management
-          </TabsTrigger>
-          <TabsTrigger value="raci" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            RACI Matrix
           </TabsTrigger>
           <TabsTrigger value="performance" className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
@@ -924,10 +918,6 @@ export default function Dashboard() {
           <TabsTrigger value="stakeholders" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Stakeholders
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <Shield className="w-4 h-4" />
-            Security
           </TabsTrigger>
         </TabsList>
 
@@ -1266,23 +1256,6 @@ export default function Dashboard() {
           />
         </TabsContent>
 
-        <TabsContent value="raci" className="space-y-6">
-          {selectedProjectId && selectedProjectId !== 'all' ? (
-            <RACIMatrix projectId={selectedProjectId} />
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  RACI Matrix
-                </CardTitle>
-                <CardDescription>
-                  Select a project to view its RACI assignments
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
-        </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
           <Card>
