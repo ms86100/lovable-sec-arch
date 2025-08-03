@@ -878,46 +878,56 @@ export default function Dashboard() {
 
       {/* Enhanced Dashboard with Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full lg:w-auto lg:grid-cols-9">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Overview
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-1 h-auto p-1">
+          <TabsTrigger value="overview" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Overview</span>
+            <span className="sm:hidden">Over</span>
           </TabsTrigger>
-          <TabsTrigger value="timeline" className="flex items-center gap-2">
-            <BarChartIcon className="w-4 h-4" />
-            Timeline
+          <TabsTrigger value="timeline" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <BarChartIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Timeline</span>
+            <span className="sm:hidden">Time</span>
           </TabsTrigger>
-          <TabsTrigger value="risks" className="flex items-center gap-2">
-            <Shield className="w-4 h-4" />
-            Risk Management
+          <TabsTrigger value="risks" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Risks</span>
+            <span className="sm:hidden">Risk</span>
           </TabsTrigger>
-          <TabsTrigger value="performance" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Performance
+          <TabsTrigger value="performance" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Performance</span>
+            <span className="sm:hidden">Perf</span>
           </TabsTrigger>
-          <TabsTrigger value="resources" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Resources
+          <TabsTrigger value="resources" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Resources</span>
+            <span className="sm:hidden">Res</span>
           </TabsTrigger>
-          <TabsTrigger value="budget" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Budget
+          <TabsTrigger value="budget" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <Target className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Budget</span>
+            <span className="sm:hidden">$$</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Analytics
+          <TabsTrigger value="analytics" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Analytics</span>
+            <span className="sm:hidden">Data</span>
           </TabsTrigger>
-          <TabsTrigger value="communication" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            Communication
+          <TabsTrigger value="communication" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Comm</span>
+            <span className="sm:hidden">Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="documents" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Documents
+          <TabsTrigger value="documents" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Docs</span>
+            <span className="sm:hidden">Doc</span>
           </TabsTrigger>
-          <TabsTrigger value="stakeholders" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Stakeholders
+          <TabsTrigger value="stakeholders" className="flex flex-col sm:flex-row items-center gap-1 text-xs sm:text-sm px-2 py-2 h-auto">
+            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Stakeholders</span>
+            <span className="sm:hidden">Team</span>
           </TabsTrigger>
         </TabsList>
 
