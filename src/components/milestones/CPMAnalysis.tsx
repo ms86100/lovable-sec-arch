@@ -76,18 +76,38 @@ export function CPMAnalysis({ projectId, projectName, milestoneId }: CPMAnalysis
     fetchTasks()
   }, [projectId, milestoneId])
 
-  // Convert database tasks to CPM format (using points as days)
+  // Convert database tasks to CPM format (using effort hours as days)
   const cpmTasks: CPMTask[] = useMemo(() => {
-    return tasks.map(task => ({
-      id: task.id,
-      title: task.title,
-      duration: task.estimated_effort_hours || 1, // Default 1 day if not set
-      dependencies: Array.isArray(task.dependencies) ? task.dependencies : []
-    }))
+    return tasks.map(task => {
+      // Convert estimated_effort_hours to days (assuming 8 hours per day)
+      const durationInDays = Math.ceil((task.estimated_effort_hours || 8) / 8)
+      
+      // Parse dependencies - they come from database as JSON
+      let dependencies: string[] = []
+      try {
+        if (task.dependencies) {
+          if (Array.isArray(task.dependencies)) {
+            dependencies = task.dependencies
+          } else if (typeof task.dependencies === 'string') {
+            dependencies = JSON.parse(task.dependencies)
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to parse dependencies for task:', task.id, error)
+        dependencies = []
+      }
+      
+      return {
+        id: task.id,
+        title: task.title,
+        duration: durationInDays,
+        dependencies: dependencies.filter(dep => dep && typeof dep === 'string')
+      }
+    })
   }, [tasks])
 
   // Calculate CPM
-  const cmpResult: CPMResult | null = useMemo(() => {
+  const cpmResult: CPMResult | null = useMemo(() => {
     if (cpmTasks.length === 0) return null
     
     try {
@@ -110,8 +130,8 @@ export function CPMAnalysis({ projectId, projectName, milestoneId }: CPMAnalysis
     return { milestone, result }
   }, [])
 
-  const currentData = showExample ? exampleData.result : cmpResult
-  const currentTasks = showExample ? exampleData.result.tasks : (cmpResult?.tasks || [])
+  const currentData = showExample ? exampleData.result : cpmResult
+  const currentTasks = showExample ? exampleData.result.tasks : (cpmResult?.tasks || [])
 
   if (!projectId && !milestoneId) {
     return (
