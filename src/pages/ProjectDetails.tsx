@@ -17,7 +17,7 @@ import { ProjectDocumentation } from '@/components/documentation/ProjectDocument
 import { ProjectForm } from '@/components/forms/ProjectForm'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ProjectAOP } from '@/components/aop/ProjectAOP'
-import { CPMAnalysis } from '@/components/milestones/CPMAnalysis'
+import { CPMAnalysis } from '@/modules/milestones'
 import { 
   ArrowLeft, 
   Calendar, 
