@@ -18,6 +18,8 @@ import { ProjectForm } from '@/components/forms/ProjectForm'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ProjectAOP } from '@/modules/aop'
 import { CPMAnalysis } from '@/modules/milestones'
+import { RetrospectiveBoard } from '@/modules/retrospectives'
+import { WhatIf } from '@/modules/capacity'
 import { 
   ArrowLeft, 
   Calendar, 
@@ -33,7 +35,9 @@ import {
   Edit,
   Shield,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  ClipboardList,
+  Beaker
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
@@ -267,7 +271,7 @@ const ProjectDetails = () => {
 
         {/* Project Details Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11 text-xs">
+          <TabsList className="grid w-full grid-cols-12 text-xs">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <Package className="w-3 h-3" />
               Overview
@@ -307,6 +311,14 @@ const ProjectDetails = () => {
             <TabsTrigger value="documentation" className="flex items-center gap-1">
               <FileText className="w-3 h-3" />
               Docs
+            </TabsTrigger>
+            <TabsTrigger value="retrospectives" className="flex items-center gap-1">
+              <ClipboardList className="w-3 h-3" />
+              Retrospectives
+            </TabsTrigger>
+            <TabsTrigger value="whatif" className="flex items-center gap-1">
+              <Beaker className="w-3 h-3" />
+              What-If
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1">
               <Settings className="w-3 h-3" />
@@ -432,6 +444,14 @@ const ProjectDetails = () => {
 
           <TabsContent value="risks" className="space-y-6">
             <RiskManager projectId={project.id} projectName={project.name} />
+          </TabsContent>
+
+          <TabsContent value="retrospectives" className="space-y-6">
+            <RetrospectiveBoard projectId={project.id} />
+          </TabsContent>
+
+          <TabsContent value="whatif" className="space-y-6">
+            <WhatIf projectId={project.id} />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
