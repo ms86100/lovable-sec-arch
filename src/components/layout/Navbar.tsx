@@ -90,6 +90,7 @@ const Navbar = () => {
               return (
                 <Link key={item.path} to={item.path}>
                   <Button
+                    data-tour={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                     variant={isActive(item.path) ? "default" : "ghost"}
                     className={`relative ${
                       isActive(item.path) 

@@ -23,16 +23,18 @@ const ProjectNew = () => {
         </div>
 
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Create New Project</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2" data-tour="projectnew-title">Create New Project</h1>
           <p className="text-muted-foreground">
             Set up a new project with all the necessary details and configuration.
           </p>
         </div>
 
-        <ProjectForm
-          onSuccess={() => navigate('/projects')}
-          onCancel={() => navigate('/projects')}
-        />
+        <div data-tour="projectnew-form">
+          <ProjectForm
+            onSuccess={() => navigate('/projects')}
+            onCancel={() => navigate('/projects')}
+          />
+        </div>
       </div>
     </div>
   )

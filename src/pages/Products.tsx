@@ -160,13 +160,13 @@ export default function Products() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Products</h1>
+          <h1 className="text-3xl font-bold" data-tour="products-title">Products</h1>
           <p className="text-muted-foreground">Manage your product portfolio</p>
         </div>
         {canCreateProducts && (
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button data-tour="products-new">
                 <Plus className="w-4 h-4 mr-2" />
                 New Product
               </Button>
@@ -188,11 +188,12 @@ export default function Products() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full"
+          data-tour="products-search"
         />
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-tour="products-grid">
         {filteredProducts.map((product) => (
           <Card 
             key={product.id} 

@@ -184,7 +184,7 @@ const ProjectDetails = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Projects
             </Button>
-            <div>
+            <div data-tour="project-title">
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-3xl font-bold">{project.name}</h1>
                 <Badge variant={getStatusColor(project.status)}>
@@ -205,6 +205,7 @@ const ProjectDetails = () => {
             size="sm"
             className="flex items-center gap-2"
             onClick={() => setShowEditDialog(true)}
+            data-tour="project-edit"
           >
             <Edit className="w-4 h-4" />
             Edit Project
@@ -271,7 +272,7 @@ const ProjectDetails = () => {
 
         {/* Project Details Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-12 text-xs">
+          <TabsList className="grid w-full grid-cols-12 text-xs" data-tour="project-tabs">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <Package className="w-3 h-3" />
               Overview

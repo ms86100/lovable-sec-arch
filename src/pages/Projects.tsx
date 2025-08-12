@@ -189,7 +189,7 @@ const Projects = () => {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Projects</h1>
+            <h1 className="text-3xl font-bold text-foreground" data-tour="projects-title">Projects</h1>
             <p className="text-muted-foreground">
               {productFilter ? 'Projects filtered by selected product' : 'Manage and monitor all your projects'}
             </p>
@@ -197,6 +197,7 @@ const Projects = () => {
           <Button 
             className="bg-primary hover:bg-primary/90"
             onClick={() => navigate('/projects/new')}
+            data-tour="projects-new"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Project
@@ -204,7 +205,7 @@ const Projects = () => {
         </div>
 
         {/* Filters */}
-        <Card className="border-border">
+        <Card className="border-border" data-tour="projects-filters">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
@@ -234,7 +235,7 @@ const Projects = () => {
         </Card>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6" data-tour="projects-grid">
           {filteredProjects.map((project) => (
             <Card 
               key={project.id} 

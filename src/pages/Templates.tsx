@@ -140,18 +140,18 @@ export default function Templates() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Project Templates</h1>
+          <h1 className="text-3xl font-bold" data-tour="templates-title">Project Templates</h1>
           <p className="text-muted-foreground">
             Create reusable templates with custom fields for projects
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
+        <Button onClick={() => setShowForm(true)} data-tour="templates-new">
           <Plus className="mr-2 h-4 w-4" />
           Create Template
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-tour="templates-grid">
         {templates.map((template) => (
           <Card key={template.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
