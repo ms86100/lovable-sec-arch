@@ -22,26 +22,47 @@ function useElementRect(selector: string | null) {
 
   useEffect(() => {
     if (!selector) return;
-    const el = document.querySelector(selector) as HTMLElement | null;
-    if (!el) {
-      setRect(null);
-      return;
-    }
 
-    const update = () => {
-      const r = el.getBoundingClientRect();
-      setRect(new DOMRect(r.left, r.top, r.width, r.height));
+    let el = document.querySelector(selector) as HTMLElement | null;
+    let ro: ResizeObserver | null = null;
+    let mo: MutationObserver | null = null;
+    let scrollHandler: (() => void) | null = null;
+    let resizeHandler: (() => void) | null = null;
+
+    const attach = (target: HTMLElement) => {
+      const update = () => {
+        const r = target.getBoundingClientRect();
+        setRect(new DOMRect(r.left, r.top, r.width, r.height));
+      };
+      update();
+      ro = new ResizeObserver(update);
+      ro.observe(target);
+      scrollHandler = update;
+      resizeHandler = update;
+      window.addEventListener("scroll", scrollHandler, { passive: true });
+      window.addEventListener("resize", resizeHandler);
     };
 
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    if (el) {
+      attach(el);
+    } else {
+      // Watch the DOM until the element appears
+      setRect(null);
+      mo = new MutationObserver(() => {
+        el = document.querySelector(selector) as HTMLElement | null;
+        if (el) {
+          mo?.disconnect();
+          attach(el);
+        }
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    }
+
     return () => {
-      ro.disconnect();
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      ro?.disconnect();
+      mo?.disconnect();
+      if (scrollHandler) window.removeEventListener("scroll", scrollHandler);
+      if (resizeHandler) window.removeEventListener("resize", resizeHandler);
     };
   }, [selector]);
 
@@ -115,7 +136,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({
     onFinish?.();
   };
 
-  if (!active || !step) return null;
+  if (!active || !step || !rect) return null;
 
   const portalTarget = document.body;
 
